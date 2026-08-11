@@ -1,0 +1,22 @@
+{
+  "uuid": "a55b212e-cd25-4014-a138-69cdec87aa19",
+  "taskName": "LSD",
+  "promptVersion": "lsd_prompt_v1.1",
+  "imagePath": "/mnt/data-center/scenes/GER/MACHET18/260423/Rec_Drv_GER_MACHET18_20260423_084825/images/2160p_h120_front/GER_MACHET18_20260423_084825_1776926949099016_2160p_h120_front.jpg",
+  "tags": {
+    "lsd_tags": {
+      "low_streetlight_road": "absent",
+      "oncoming_vehicle_far_60m": "enabled",
+      "oncoming_vehicle_taillight_cluster": "enabled",
+      "motorbike_headlamp": "enabled",
+      "reflector_guardrail": "enabled",
+      "reflector_lane_divider": "enabled",
+      "reflector_tunnel_lowmid_light": "enabled",
+      "reflector_white_all": "enabled",
+      "sign_strong_light_reflection": "enabled",
+      "sign_white_heavy_reflection": "enabled",
+      "camera_torn_frame": "enabled"
+    }
+  },
+  "rawModelResponse": "{\n  \"lsd_tags\": {\n    \"low_streetlight_road\": \"absent\",\n    \"oncoming_vehicle_far_60m\": \"enabled\",\n    \"oncoming_vehicle_taillight_cluster\": \"enabled\",\n    \"motorbike_headlamp\": \"enabled\",\n    \"reflector_guardrail\": \"enabled\",\n    \"reflector_lane_divider\": \"enabled\",\n    \"reflector_tunnel_lowmid_light\": \"enabled\",\n    \"reflector_white_all\": \"enabled\",\n    \"sign_strong_light_reflection\": \"enabled\",\n    \"sign_white_heavy_reflection\": \"enabled\",\n    \"camera_torn_frame\": \"enabled\"\n  }\n}\n```"
+}

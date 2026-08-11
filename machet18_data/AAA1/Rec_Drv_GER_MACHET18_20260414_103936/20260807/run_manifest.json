@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "taskName": "AAA1",
+  "runId": "20260807",
+  "status": "completed",
+  "createdAt": "2026-08-07T04:33:56.669258+00:00",
+  "updatedAt": "2026-08-07T04:35:36.007392+00:00",
+  "input": {
+    "inputDataPath": "/mnt/data-center/scenes/GER/MACHET18/260414/Rec_Drv_GER_MACHET18_20260414_103936/images/2160p_h120_front"
+  },
+  "output": {
+    "outputPrefix": "outputs/MACHET18_10clips/AAA1/Rec_Drv_GER_MACHET18_20260414_103936/20260807"
+  },
+  "stages": [
+    {
+      "name": "discover",
+      "status": "ok",
+      "startedAt": "2026-08-07T04:33:56.669272+00:00",
+      "finishedAt": "2026-08-07T04:33:58.863271+00:00",
+      "elapsedSec": 2.194,
+      "counts": {
+        "images": 599
+      }
+    },
+    {
+      "name": "serverWait",
+      "status": "ok",
+      "startedAt": "2026-08-07T04:33:58.863581+00:00",
+      "finishedAt": "2026-08-07T04:33:58.868678+00:00",
+      "elapsedSec": 0.005,
+      "counts": {}
+    },
+    {
+      "name": "tagging",
+      "status": "ok",
+      "startedAt": "2026-08-07T04:33:59.289379+00:00",
+      "finishedAt": "2026-08-07T04:35:36.006431+00:00",
+      "elapsedSec": 96.717,
+      "counts": {
+        "totalItems": 599,
+        "tagged": 599,
+        "failed": 0
+      }
+    }
+  ]
+}

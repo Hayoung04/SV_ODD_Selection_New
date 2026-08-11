@@ -1,0 +1,12 @@
+es-data/
+.env
+**/.env
+*.env
+.env
+**/.env
+*.env
+*credentials*
+*.pem
+*.key
+kafka/secrets/
+es-data/

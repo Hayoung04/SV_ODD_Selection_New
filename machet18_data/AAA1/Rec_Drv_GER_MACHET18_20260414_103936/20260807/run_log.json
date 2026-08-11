@@ -1,0 +1,79 @@
+{
+  "taskName": "AAA1",
+  "promptVersion": "aaa1_prompt_v1",
+  "inputDataPath": "/mnt/data-center/scenes/GER/MACHET18/260414/Rec_Drv_GER_MACHET18_20260414_103936/images/2160p_h120_front",
+  "outputPrefix": "outputs/MACHET18_10clips/AAA1/Rec_Drv_GER_MACHET18_20260414_103936/20260807",
+  "model": "Qwen/Qwen3.5-4B",
+  "baseUrl": "http://localhost:8000/v1",
+  "concurrency": 64,
+  "startedAt": "2026-08-07T04:33:56",
+  "finishedAt": "2026-08-07T04:35:35",
+  "stepsSec": {
+    "discover": 2.194,
+    "serverWait": 0.005,
+    "tagging": 96.613,
+    "total": 99.233
+  },
+  "counts": {
+    "totalItems": 599,
+    "tagged": 599,
+    "failed": 0
+  },
+  "throughput": {
+    "imagesPerSec": 6.2,
+    "avgLatencySec": 9.853
+  },
+  "resources": {
+    "gpu": [
+      {
+        "index": 0,
+        "memory_used_mib": 1780,
+        "memory_total_mib": 32607,
+        "utilization_pct": 0
+      },
+      {
+        "index": 1,
+        "memory_used_mib": 29288,
+        "memory_total_mib": 32607,
+        "utilization_pct": 40
+      },
+      {
+        "index": 2,
+        "memory_used_mib": 28826,
+        "memory_total_mib": 32607,
+        "utilization_pct": 0
+      },
+      {
+        "index": 3,
+        "memory_used_mib": 28670,
+        "memory_total_mib": 32607,
+        "utilization_pct": 44
+      },
+      {
+        "index": 4,
+        "memory_used_mib": 28592,
+        "memory_total_mib": 32607,
+        "utilization_pct": 39
+      },
+      {
+        "index": 5,
+        "memory_used_mib": 29130,
+        "memory_total_mib": 32607,
+        "utilization_pct": 0
+      },
+      {
+        "index": 6,
+        "memory_used_mib": 28928,
+        "memory_total_mib": 32607,
+        "utilization_pct": 0
+      },
+      {
+        "index": 7,
+        "memory_used_mib": 28826,
+        "memory_total_mib": 32607,
+        "utilization_pct": 0
+      }
+    ]
+  },
+  "status": "ok"
+}

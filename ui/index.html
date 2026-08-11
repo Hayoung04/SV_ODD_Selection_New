@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ODD Frame Search</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f4f5fa;
+    --panel: #ffffff;
+    --line: #ecedf4;
+    --ink: #1e2130;
+    --ink-soft: #8085a0;
+    --ink-faint: #a7abc0;
+    --accent: #7300f0;
+    --accent-2: #9333f5;
+    --accent-wash: #f3e6fe;
+    --accent-ink: #6200d1;
+    --green: #17a673; --green-wash: #e7f8f1;
+    --amber: #d98a1c; --amber-wash: #fdf3e2;
+    --blue: #2f7ff0; --blue-wash: #e9f2ff;
+    --red: #e0435a; --red-wash: #fdeaed;
+    --gray-active: #4b5163;
+    --radius-lg: 16px;
+    --radius-md: 12px;
+    --radius-sm: 8px;
+    --shadow: 0 1px 2px rgba(20,20,50,0.04), 0 4px 16px rgba(20,20,50,0.05);
+    --font: 'Inter', sans-serif;
+    --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { width: 100%; overflow-x: hidden; }
+  body { margin: 0; font-family: var(--font); background: var(--bg); color: var(--ink); -webkit-font-smoothing: antialiased; }
+
+  .app { display: flex; flex-direction: column; min-height: 100vh; }
+  
+  .top-filter-bar { background: var(--panel); border-bottom: 1px solid var(--line); padding: 20px 34px; width: 100%; }
+  .tf-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 16px; flex-wrap: wrap; }
+  
+  .logo { display: flex; align-items: center; gap: 9px; }
+  .logo-mark { width: 30px; height: 30px; border-radius: 9px; background: linear-gradient(135deg, var(--accent), var(--accent-2)); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 13px; flex-shrink: 0; }
+  .logo-text { font-weight: 700; font-size: 15px; letter-spacing: -0.01em; }
+  .logo-sub { font-size: 11px; color: var(--ink-faint); margin-top: -2px; }
+
+  .header-right { display: flex; align-items: center; gap: 16px; }
+
+  .auto-refresh-toggle { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--ink-soft); cursor: pointer; user-select: none; }
+  .toggle-track { width: 36px; height: 20px; border-radius: 999px; background: #d3d5e2; position: relative; transition: background 0.15s; flex-shrink: 0; }
+  .toggle-track::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: white; transition: transform 0.15s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+  .auto-refresh-toggle input { display: none; }
+  .auto-refresh-toggle input:checked + .toggle-track { background: var(--accent); }
+  .auto-refresh-toggle input:checked + .toggle-track::after { transform: translateX(16px); }
+  .live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); display: inline-block; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  .tf-body { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; align-items: start; }
+  @media (max-width: 900px) { .tf-body { grid-template-columns: 1fr; } }
+  .tf-col { display: flex; flex-direction: column; }
+
+  .nav-label { font-size: 11px; font-weight: 600; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.04em; padding: 0 4px 8px; display: flex; justify-content: space-between; align-items: center; }
+  .nav-hint { font-size: 10px; color: var(--ink-faint); text-transform: none; letter-spacing: 0; font-weight: 400; }
+  
+  .filter-card { background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius-md); padding: 14px; margin-bottom: 16px; }
+  
+  .scrollable-panel { max-height: 305px; overflow-y: auto; padding-right: 10px; }
+  .scrollable-panel::-webkit-scrollbar { width: 6px; }
+  .scrollable-panel::-webkit-scrollbar-thumb { background: var(--ink-faint); border-radius: 4px; }
+
+  .field-row { margin-bottom: 10px; }
+  .field-row:last-child { margin-bottom: 0; }
+  .field-row label { display: block; font-size: 11px; color: var(--ink-soft); margin-bottom: 5px; font-weight: 500; font-family: var(--font-mono); word-break: break-all; }
+  select { width: 100%; padding: 8px 10px; background: white; border: 1px solid var(--line); border-radius: var(--radius-sm); color: var(--ink); font-family: var(--font); font-size: 12.5px; }
+  select.task-select { font-weight: 700; border: 1.5px solid var(--accent); color: var(--accent-ink); background: var(--accent-wash); }
+
+  .chip-toggle-group { display: flex; gap: 5px; flex-wrap: wrap; }
+  .chip-toggle {
+    font-family: var(--font-mono); font-size: 10.5px; font-weight: 600;
+    padding: 4px 9px; border-radius: 999px; border: 1px solid var(--line);
+    background: white; color: var(--ink-soft); cursor: pointer;
+    transition: all 0.1s;
+  }
+  .chip-toggle:hover { border-color: var(--accent); }
+  .chip-toggle.active[data-value="present"] { background: var(--accent); color: white; border-color: var(--accent); }
+  .chip-toggle.active[data-value="absent"] { background: var(--gray-active); color: white; border-color: var(--gray-active); }
+  .chip-toggle.active[data-value="unknown"] { background: var(--amber); color: white; border-color: var(--amber); }
+
+  .accordion-cat { border: 1px solid var(--line); border-radius: var(--radius-sm); margin-bottom: 6px; background: white; overflow: hidden; }
+  .accordion-head { display: flex; justify-content: space-between; align-items: center; padding: 9px 11px; cursor: pointer; font-size: 12.5px; font-weight: 600; color: var(--ink); user-select: none; font-family: var(--font-mono); }
+  .accordion-head:hover { background: var(--bg); }
+  .accordion-head .meta { display: flex; align-items: center; gap: 6px; }
+  .accordion-head .arrow { font-size: 10px; color: var(--ink-faint); transition: transform 0.15s; }
+  .accordion-cat.open .arrow { transform: rotate(90deg); }
+  .accordion-body { display: none; padding: 4px 8px 8px; border-top: 1px solid var(--line); }
+  .accordion-cat.open .accordion-body { display: block; }
+  label.chk { display: flex; align-items: center; gap: 8px; font-size: 11.5px; padding: 5px 6px; border-radius: 7px; cursor: pointer; color: #454a5e; transition: background 0.12s; font-family: var(--font-mono); }
+  label.chk:hover { background: var(--bg); }
+  label.chk input { appearance: none; width: 15px; height: 15px; border: 1.5px solid #d3d5e2; border-radius: 5px; background: white; display: grid; place-content: center; flex-shrink: 0; cursor: pointer; }
+  label.chk input:checked { background: var(--accent); border-color: var(--accent); }
+  label.chk input:checked::after { content: ""; width: 7px; height: 4.5px; border-left: 2px solid white; border-bottom: 2px solid white; transform: rotate(-45deg) translate(0.5px, -1px); }
+  .cat-badge-count { background: var(--accent-wash); color: var(--accent-ink); font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 999px; }
+
+  .btn-row { display: flex; gap: 8px; }
+  button { font-family: var(--font); font-weight: 600; font-size: 13.5px; border-radius: var(--radius-sm); border: none; padding: 11px 16px; cursor: pointer; transition: opacity 0.12s, transform 0.05s, box-shadow 0.12s; }
+  button:active { transform: translateY(1px); }
+  .btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: white; box-shadow: 0 4px 14px rgba(115,0,240,0.32); }
+  .btn-primary:hover { opacity: 0.94; }
+  .btn-ghost { background: white; color: var(--ink-soft); border: 1px solid var(--line); }
+  .btn-ghost:hover { background: var(--bg); }
+
+  .schema-flag { display: flex; gap: 7px; background: var(--amber-wash); color: #96650f; border-radius: var(--radius-sm); padding: 9px 10px; font-size: 11px; line-height: 1.5; margin-top: 8px; }
+
+  .main { padding: 26px 34px 60px; width: 100%; }
+  .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; gap: 16px; flex-wrap: wrap; }
+  .breadcrumb { font-size: 13px; color: var(--ink-faint); }
+  .breadcrumb b { color: var(--ink); font-weight: 600; }
+  .search-box { display: flex; align-items: center; gap: 8px; background: white; border: 1px solid var(--line); border-radius: 999px; padding: 9px 16px; font-size: 12px; color: var(--ink-faint); font-family: var(--font-mono); max-width: 480px; overflow-x: auto; white-space: nowrap; }
+  .search-box .tok-key { color: var(--ink-soft); }
+  .search-box .tok-val { color: var(--accent-ink); font-weight: 600; }
+
+  .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 22px; }
+  .stat-card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow); padding: 18px 20px; }
+  .stat-card .icon-wrap { width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 15px; margin-bottom: 12px; }
+  .stat-card.total .icon-wrap { background: var(--blue-wash); color: var(--blue); }
+  .stat-card.matched .icon-wrap { background: var(--green-wash); color: var(--green); }
+  .stat-card.filters .icon-wrap { background: var(--accent-wash); color: var(--accent-ink); }
+  .stat-card .label { font-size: 12px; color: var(--ink-soft); margin-bottom: 4px; }
+  .stat-card .value { font-size: 24px; font-weight: 700; letter-spacing: -0.01em; }
+
+  .results-panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow); min-width: 0; }
+  .results-toolbar { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid var(--line); flex-wrap: wrap; gap: 16px; }
+  .results-toolbar h2 { font-size: 15px; margin: 0; font-weight: 700; }
+  .btn-export { background: var(--accent-wash); color: var(--accent-ink); font-size: 12.5px; padding: 8px 14px; display: flex; align-items: center; gap: 6px; border: none; border-radius: var(--radius-sm); cursor: pointer; font-weight: 600;}
+  .btn-export:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .result-list { display: flex; flex-direction: column; gap: 16px; padding: 20px; background: var(--bg); border-radius: 0 0 var(--radius-lg) var(--radius-lg); }
+
+  /* 카드: 좌측 이미지 + 우측 정보 2단 구조 */
+  .result-card {
+    background: white; border: 1px solid var(--line); border-radius: var(--radius-md);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    display: grid; grid-template-columns: 380px 1fr;
+    overflow: hidden;
+  }
+  @media (max-width: 1100px) { .result-card { grid-template-columns: 1fr; } }
+
+  /* 좌측 이미지 영역 */
+  .rc-image-wrap {
+    background: #fafbfc; display: flex; align-items: center; justify-content: center;
+    padding: 14px; border-right: 1px solid var(--line);
+  }
+  .rc-image { width: 100%; height: auto; max-height: 340px; object-fit: contain; border-radius: var(--radius-sm); }
+
+  /* 우측 정보 영역 */
+  .rc-info { display: flex; flex-direction: column; min-width: 0; }
+
+  .rc-head { display: flex; align-items: flex-start; gap: 32px; padding: 16px 18px; background: #fafbfc; border-bottom: 1px solid var(--line); }
+  .rc-head-item { display: flex; flex-direction: column; gap: 6px; }
+  .rc-label { font-size: 10.5px; font-weight: 700; color: var(--ink-faint); letter-spacing: 0.04em; }
+  
+  .rc-uuid { font-family: var(--font-mono); font-size: 12px; color: var(--ink); font-weight: 500; word-break: break-all; padding: 3px 6px;}
+  
+  .rc-path-wrap { display: flex; align-items: flex-start; gap: 8px; width: 100%; min-width: 0; }
+  .rc-path {
+    flex: 1; font-family: var(--font-mono); font-size: 12px; color: var(--ink-soft);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    cursor: pointer; padding: 3px 6px; border-radius: 5px;
+    border: 1px dashed transparent; transition: background 0.1s, border-color 0.1s;
+  }
+  .rc-path:hover { background: var(--accent-wash); border-color: rgba(115,0,240,0.25); color: var(--accent-ink); }
+  .rc-path.expanded {
+    white-space: normal; word-break: break-all; overflow: visible; text-overflow: clip;
+    background: #fafbff; border-color: var(--line); color: var(--ink); line-height: 1.6;
+  }
+  
+  .path-copy-btn { flex-shrink: 0; border: 1px solid var(--line); background: white; color: var(--ink-faint); border-radius: 5px; font-size: 11px; padding: 4px 8px; cursor: pointer; font-family: var(--font); font-weight: 600; }
+  .path-copy-btn:hover { background: var(--accent-wash); color: var(--accent-ink); border-color: var(--accent); }
+  .path-copy-btn.copied { background: var(--green-wash); color: var(--green); border-color: var(--green); }
+  .path-copy-btn.review-btn { background: var(--accent-wash); color: var(--accent-ink); border-color: rgba(115,0,240,0.25); }
+  .path-copy-btn.review-btn:hover { background: var(--accent); color: white; border-color: var(--accent); }
+
+  .rc-body { display: flex; flex-direction: column; gap: 18px; padding: 16px 18px; }
+  .rc-col { display: flex; flex-direction: column; gap: 8px; }
+  .rc-col-title { font-size: 11px; font-weight: 600; color: var(--ink-faint); letter-spacing: 0.02em; }
+
+  .tag-chip, .badge { display: inline-flex; align-items: center; border-radius: 6px; padding: 4px 8px; font-size: 10.5px; font-weight: 600; margin: 0; white-space: nowrap; font-family: var(--font-mono); }
+  .tag-chip { background: var(--accent-wash); color: var(--accent-ink); border: 1px solid rgba(115, 0, 240, 0.15); }
+  .tag-chip.unknown { background: var(--amber-wash); color: var(--amber); border: 1px solid rgba(217, 138, 28, 0.2); }
+  .badge.env { background: var(--blue-wash); color: var(--blue); border: 1px solid rgba(47, 127, 240, 0.15); }
+
+  /* Motional: 이 프레임 시각에 실제로 발생 중 (진한 초록) */
+  .badge.motional { background: #d6f0e5; color: #0f7a53; border: 1px solid rgba(23, 166, 115, 0.35); }
+  /* Motional: ±0.5초 padding으로 걸린 것 (연한 + 점선) */
+  .badge.motional.nearby { background: #f4f8f6; color: #8fada2; border: 1px dashed rgba(23, 166, 115, 0.45); font-weight: 500; }
+
+  .chip-group { display: flex; flex-wrap: wrap; gap: 8px; align-content: flex-start; }
+
+  .state-block { text-align: center; padding: 60px 20px; color: var(--ink-faint); font-size: 13.5px; background: white; }
+  .state-block .icon { font-size: 26px; margin-bottom: 10px; opacity: 0.4; }
+  .error-box { background: var(--red-wash); border: 1px solid #f3c1cb; color: #b4283f; padding: 12px 16px; border-radius: var(--radius-sm); font-size: 13px; margin-bottom: 16px; }
+
+  #toastContainer { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+  .toast {
+    background: var(--ink); color: white; padding: 13px 18px; border-radius: var(--radius-md);
+    box-shadow: 0 8px 28px rgba(20,20,50,0.28); font-size: 13px; font-weight: 500;
+    display: flex; align-items: center; gap: 11px; min-width: 260px;
+    animation: toastIn 0.28s cubic-bezier(0.16, 1, 0.3, 1); pointer-events: auto;
+  }
+  .toast.leaving { animation: toastOut 0.25s ease forwards; }
+  .toast .toast-icon { width: 24px; height: 24px; border-radius: 50%; background: var(--green); color: white; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+  .toast .toast-body { display: flex; flex-direction: column; gap: 2px; }
+  .toast .toast-title { font-weight: 700; }
+  .toast .toast-sub { font-size: 11.5px; color: #b8bcd0; font-family: var(--font-mono); }
+  @keyframes toastIn { from { opacity: 0; transform: translateX(40px) scale(0.95); } to { opacity: 1; transform: translateX(0) scale(1); } }
+  @keyframes toastOut { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(40px); } }
+  @keyframes flashUpdate { 0% { box-shadow: 0 0 0 0 rgba(23, 166, 115, 0.45); } 100% { box-shadow: 0 0 0 12px rgba(23, 166, 115, 0); } }
+  .results-panel.updated { animation: flashUpdate 0.9s ease-out; }
+</style>
+</head>
+<body>
+
+<div id="toastContainer"></div>
+
+<div class="app">
+  <header class="top-filter-bar">
+    <div class="tf-header">
+      <div class="logo">
+        <div class="logo-mark">OD</div>
+        <div>
+          <div class="logo-text">ODD Search</div>
+          <div class="logo-sub" id="logoSub">taskName 선택</div>
+        </div>
+      </div>
+      <div class="header-right">
+        <label class="auto-refresh-toggle" title="새 데이터가 색인되면 자동으로 결과를 갱신합니다">
+          <input type="checkbox" id="autoRefreshToggle" checked onchange="onAutoRefreshToggle()">
+          <span class="toggle-track"></span>
+          <span id="autoRefreshLabel"><span class="live-dot"></span> 자동 갱신</span>
+        </label>
+        <div class="btn-row">
+          <button class="btn-ghost" onclick="resetFilters()">초기화</button>
+          <button class="btn-primary" onclick="runSearch()">검색 실행</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="tf-body">
+      <div class="tf-col">
+        <div class="nav-label">Task</div>
+        <div class="filter-card">
+          <div class="field-row">
+            <label>taskName (프로젝트별로 태그 구성이 다름)</label>
+            <select id="fTaskName" class="task-select" onchange="onTaskNameChange()"></select>
+          </div>
+        </div>
+        <div id="envSection"></div>
+      </div>
+
+      <div class="tf-col" id="targetSection"></div>
+
+      <div class="tf-col">
+        <div class="nav-label">
+          <span>Motional Scenarios (58)</span>
+          <span class="nav-hint">복수 선택 시 OR</span>
+        </div>
+        <div class="filter-card" style="padding: 10px 4px 17px 10px;">
+          <div id="motionalAccordion" class="scrollable-panel"></div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="schema-flag">⚠ LD_General/OD_General은 엑셀의 "ODD Class" 값을 필드명으로 가정 구성. present/absent/unknown 방식인지, taskName 문자열이 정확한지 호연 확인 전.</div>
+  </header>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="breadcrumb">Tools / <b>Frame Search</b></div>
+      <div class="search-box" id="queryStrip">query: <span class="tok-key">match_all</span></div>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-card total"><div class="icon-wrap">▤</div><div class="label">인덱스 전체 문서</div><div class="value" id="statTotal">—</div></div>
+      <div class="stat-card matched"><div class="icon-wrap">✓</div><div class="label">현재 검색 결과</div><div class="value" id="statMatched">—</div></div>
+      <div class="stat-card filters"><div class="icon-wrap">▣</div><div class="label">선택된 조건 수</div><div class="value" id="statFilters">0</div></div>
+    </div>
+
+    <div id="errorBox"></div>
+
+    <div class="results-panel" id="resultsPanel">
+      <div class="results-toolbar">
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <h2>검색 결과</h2>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <div style="display: flex; gap: 16px; font-size: 11.5px; color: var(--ink-soft); font-weight: 500; flex-wrap: wrap;">
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span class="tag-chip" style="padding: 2px 6px;">Present</span> 프레임 내 확실히 존재
+              </div>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span class="tag-chip unknown" style="padding: 2px 6px;">Unknown</span> 식별 불가 (미상)
+              </div>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span class="badge motional" style="padding: 2px 6px;">Motional</span> 이 시각에 발생 중
+              </div>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span class="badge motional nearby" style="padding: 2px 6px;">Motional</span> ±0.5초 근접 매칭
+              </div>
+            </div>
+            <div style="font-size: 11px; color: var(--ink-faint);">
+              ※ 참고: 경로를 클릭하면 전체 경로가 펼쳐집니다. (우측 ⧉ 버튼 클릭 시 복사)
+            </div>
+          </div>
+        </div>
+        <button class="btn-export" onclick="exportCSV()" id="exportBtn" disabled>↓ CSV 다운로드</button>
+      </div>
+      <div id="resultArea"><div class="state-block"><div class="icon">◇</div>불러오는 중...</div></div>
+    </div>
+  </main>
+</div>
+
+<script>
+const API_URL = "/api/search";
+const COUNT_URL = "/api/count";
+const TARGET_OPTIONS = ["present", "absent", "unknown"];
+const AUTO_REFRESH_INTERVAL = 10000;
+
+const TASK_SCHEMAS = {
+  AAA1: {
+    tagFieldPrefix: "tags.aaa1_tags.",
+    targetSectionLabel: "도로/객체 상태 (FrontVision 속성)",
+    envFields: [
+      { key: "time", options: ["day", "dawn_evening", "night"] },
+      { key: "da_road_type", options: ["public_road_highway", "public_road_city", "public_road_rural", "parking_lot_outdoor", "parking_lot_indoor"] },
+      { key: "weather", options: ["clear", "rainy", "heavy_rainy", "snow", "fog"] },
+    ],
+    targetFields: [
+      "contaminated_lane", "invisible_lanes_city_3_5_lanes_many_vehicles_ahead", "no_lane_mark_road",
+      "two_three_wheelers_carrying_loads", "vehicles_carrying_loads_or_protruding_cargo", "bullock_carts",
+      "hand_pulled_carts", "animal_sitting_or_standing_cow", "animal_large_dog", "barricades",
+      "crowded_pedestrian", "yellow_line_near_curb", "yellow_line_low_sun", "white_line_low_sun",
+      "road_boundary_low_sun", "road_boundary_guardrail_or_wall", "road_boundary_lane_separator",
+      "road_boundary_flat", "road_boundary_parked_car",
+    ]
+  },
+  LSD: {
+    tagFieldPrefix: "tags.lsd_tags.",
+    targetSectionLabel: "라이트소스 속성 (야간 전용)",
+    envFields: [],
+    targetFields: [
+      "low_streetlight_road", "oncoming_vehicle_far_60m", "oncoming_vehicle_taillight_cluster",
+      "motorbike_headlamp", "reflector_guardrail", "reflector_lane_divider",
+      "reflector_tunnel_lowmid_light", "reflector_white_all", "sign_strong_light_reflection",
+      "sign_white_heavy_reflection", "camera_torn_frame",
+    ]
+  },
+  LD_General: {
+    tagFieldPrefix: "tags.ld_general_tags.",
+    targetSectionLabel: "LD General 항목 (엑셀 ODD Class 기준, 가정)",
+    envFields: [],
+    targetFields: [
+      "city_road", "rural_road", "highway", "tunnel", "junction", "outdoor_parking",
+      "construction_zone", "tollgate", "enter_exit_branch_merge", "high_curvature",
+      "uphill", "downhill", "downhill_uphill_transition", "time_day", "time_dawn_evening",
+      "time_night", "lane_changing", "no_line_mark_driving", "dark_medium", "dark_extreme",
+      "adverse_weather", "road_marker_text", "road_marker_crosswalk", "road_marker_direction_arrow",
+      "road_marker_speed_limit", "road_marker_driving_guide_line", "road_marker_zebra_zone",
+      "road_marker_decelerator", "road_marker_parking_related",
+    ]
+  },
+  OD_General: {
+    tagFieldPrefix: "tags.od_general_tags.",
+    targetSectionLabel: "OD General 항목 (엑셀 ODD Class 기준, 가정)",
+    envFields: [],
+    targetFields: [
+      "redundant_frame_skip", "normal_condition_cap", "truncated_object", "intersection_vehicle_turning",
+      "crossing_truck_bus", "far_distance_object", "very_close_object", "object_center_overlap",
+      "special_heavy_vehicle", "overloaded_2_3wheeler", "decorated_vru_vhc", "3wheeler_variant",
+      "large_animal", "slope_curve_road", "complex_urban_alley", "backlit", "low_sun",
+      "dark_rural_road", "tunnel_entry_exit", "rainy", "snowy", "night_adverse_weather",
+    ]
+  },
+};
+
+// ── Motional 58종: 원본 태그 그대로, 병합 없이 각각 개별 항목 ──
+const MOTIONAL_CATEGORIES = [
+  { cat: "traffic_light_intersection", tags: [
+    "starting_straight_traffic_light_intersection_traversal",
+    "traversing_traffic_light_intersection",
+    "on_traffic_light_intersection",
+    "on_stopline_traffic_light",
+    "accelerating_at_traffic_light",
+    "accelerating_at_traffic_light_with_lead",
+    "accelerating_at_traffic_light_without_lead",
+    "stationary_at_traffic_light_with_lead",
+    "stationary_at_traffic_light_without_lead",
+    "stopping_at_traffic_light_with_lead",
+    "stopping_at_traffic_light_without_lead",
+  ]},
+  { cat: "crosswalk", tags: [
+    "traversing_crosswalk",
+    "on_stopline_crosswalk",
+    "accelerating_at_crosswalk",
+    "stationary_at_crosswalk",
+    "stopping_at_crosswalk",
+    "waiting_for_pedestrian_to_cross",
+    "near_pedestrian_on_crosswalk",
+    "near_pedestrian_on_crosswalk_with_ego",
+  ]},
+  { cat: "intersection_turning", tags: [
+    "traversing_intersection",
+    "on_intersection",
+    "starting_u_turn",
+    "starting_left_turn",
+    "starting_right_turn",
+    "starting_high_speed_turn",
+    "starting_low_speed_turn",
+  ]},
+  { cat: "lane_change", tags: [
+    "changing_lane",
+    "changing_lane_to_left",
+    "changing_lane_to_right",
+    "changing_lane_with_lead",
+    "changing_lane_with_trail",
+    "following_lane_with_lead",
+    "following_lane_with_slow_lead",
+    "following_lane_without_lead",
+  ]},
+  { cat: "stationary_stopping", tags: [
+    "stationary",
+    "stationary_in_traffic",
+    "stopping_with_lead",
+    "stopping_without_lead",
+  ]},
+  { cat: "behind", tags: [
+    "behind_pedestrian_on_driveable",
+    "behind_bike",
+    "behind_long_vehicle",
+    "behind_motorcycle",
+  ]},
+  { cat: "crossed_by", tags: [
+    "crossed_by_bike",
+    "crossed_by_vehicle",
+    "crossed_by_motorcycle",
+  ]},
+  { cat: "near", tags: [
+    "near_barrier_on_driveable",
+    "near_high_speed_vehicle",
+    "near_long_vehicle",
+    "near_multiple_bikes",
+    "near_multiple_pedestrians",
+    "near_multiple_vehicles",
+    "near_multiple_motorcycle",
+  ]},
+  { cat: "speed_acceleration", tags: [
+    "high_lateral_acceleration",
+    "high_magnitude_jerk",
+    "high_magnitude_speed",
+    "low_magnitude_speed",
+    "medium_magnitude_speed",
+  ]},
+  { cat: "other", tags: [
+    "on_carpark",
+  ]},
+];
+
+let lastResults = [];
+let targetChipState = {};   // { fieldKey: Set("present", "unknown") }
+let lastKnownCount = null;
+let autoRefreshTimer = null;
+
+// ══════════════════════════════════════════
+//  알림 토스트
+// ══════════════════════════════════════════
+function showToast(title, sub, durationMs = 4500) {
+  const container = document.getElementById("toastContainer");
+  const toast = document.createElement("div");
+  toast.className = "toast";
+  toast.innerHTML = `
+    <div class="toast-icon">↻</div>
+    <div class="toast-body">
+      <span class="toast-title">${title}</span>
+      ${sub ? `<span class="toast-sub">${sub}</span>` : ""}
+    </div>
+  `;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.classList.add("leaving");
+    setTimeout(() => toast.remove(), 260);
+  }, durationMs);
+}
+
+// ══════════════════════════════════════════
+//  자동 갱신
+// ══════════════════════════════════════════
+async function checkForUpdates() {
+  try {
+    const res = await fetch(COUNT_URL);
+    const data = await res.json();
+    if (data.error) return;
+    const current = data.count;
+
+    if (lastKnownCount === null) {
+      lastKnownCount = current;
+      return;
+    }
+
+    if (current !== lastKnownCount) {
+      const diff = current - lastKnownCount;
+      lastKnownCount = current;
+      const title = diff > 0
+        ? `새 데이터 ${diff.toLocaleString()}건 추가됨`
+        : `데이터 ${Math.abs(diff).toLocaleString()}건 변경됨`;
+      showToast(title, `전체 ${current.toLocaleString()}건 · 결과를 갱신했습니다`);
+      await runSearch({ silent: true });
+
+      const panel = document.getElementById("resultsPanel");
+      panel.classList.remove("updated");
+      void panel.offsetWidth;
+      panel.classList.add("updated");
+    }
+  } catch (e) { /* 일시 오류는 다음 주기에 재시도 */ }
+}
+
+function startAutoRefresh() {
+  if (autoRefreshTimer) return;
+  autoRefreshTimer = setInterval(checkForUpdates, AUTO_REFRESH_INTERVAL);
+}
+function stopAutoRefresh() {
+  if (autoRefreshTimer) { clearInterval(autoRefreshTimer); autoRefreshTimer = null; }
+}
+function onAutoRefreshToggle() {
+  const on = document.getElementById("autoRefreshToggle").checked;
+  const label = document.getElementById("autoRefreshLabel");
+  if (on) {
+    label.innerHTML = `<span class="live-dot"></span> 자동 갱신`;
+    lastKnownCount = null;
+    startAutoRefresh();
+    checkForUpdates();
+    showToast("자동 갱신 켜짐", `${AUTO_REFRESH_INTERVAL / 1000}초마다 새 데이터를 확인합니다`, 2600);
+  } else {
+    label.textContent = "자동 갱신 꺼짐";
+    stopAutoRefresh();
+    showToast("자동 갱신 꺼짐", "검색 실행 버튼으로 수동 갱신하세요", 2600);
+  }
+}
+document.addEventListener("visibilitychange", () => {
+  const on = document.getElementById("autoRefreshToggle").checked;
+  if (document.hidden) stopAutoRefresh();
+  else if (on) { startAutoRefresh(); checkForUpdates(); }
+});
+
+// ══════════════════════════════════════════
+
+function buildTaskNameSelect() {
+  const el = document.getElementById("fTaskName");
+  el.innerHTML = Object.keys(TASK_SCHEMAS).map(t => `<option value="${t}">${t}</option>`).join("");
+}
+buildTaskNameSelect();
+
+function currentTaskName() { return document.getElementById("fTaskName").value; }
+
+function renderTaskSchemaSections() {
+  const taskName = currentTaskName();
+  const schema = TASK_SCHEMAS[taskName];
+  const envContainer = document.getElementById("envSection");
+  const targetContainer = document.getElementById("targetSection");
+  
+  document.getElementById("logoSub").textContent = `taskName: ${taskName}`;
+  targetChipState = {};
+  
+  if (!schema) { 
+    envContainer.innerHTML = `<div class="schema-flag">⚠ ${taskName} 스키마 미등록</div>`; 
+    targetContainer.innerHTML = "";
+    return; 
+  }
+
+  envContainer.innerHTML = schema.envFields.length ? `
+    <div class="nav-label">촬영 조건</div>
+    <div class="filter-card">
+      ${schema.envFields.map(f => `
+        <div class="field-row">
+          <label>${f.key}</label>
+          <select data-env="${f.key}" onchange="onFilterChange()">
+            <option value="">전체</option>
+            ${f.options.map(o => `<option value="${o}">${o}</option>`).join("")}
+          </select>
+        </div>
+      `).join("")}
+    </div>` : "";
+
+  targetContainer.innerHTML = `
+    <div class="nav-label">
+      <span>${schema.targetSectionLabel}</span>
+      <span class="nav-hint">복수 선택 시 OR · 미선택 = 조건 미적용</span>
+    </div>
+    <div class="filter-card" style="padding: 14px 4px 14px 14px;">
+      <div class="scrollable-panel">
+        ${schema.targetFields.map(key => `
+          <div class="field-row">
+            <label>${key}</label>
+            <div class="chip-toggle-group" data-field="${key}">
+              ${TARGET_OPTIONS.map(v => `<button type="button" class="chip-toggle" data-value="${v}" onclick="toggleTargetChip(this)">${v}</button>`).join("")}
+            </div>
+          </div>
+        `).join("")}
+      </div>
+    </div>
+  `;
+}
+
+// 여러 값 동시 선택 가능 (present + unknown 등) → OR 검색
+function toggleTargetChip(btn) {
+  const group = btn.parentElement;
+  const field = group.dataset.field;
+  const value = btn.dataset.value;
+
+  if (!targetChipState[field]) targetChipState[field] = new Set();
+  const set = targetChipState[field];
+
+  if (set.has(value)) {
+    set.delete(value);
+    btn.classList.remove("active");
+    if (set.size === 0) delete targetChipState[field];
+  } else {
+    set.add(value);
+    btn.classList.add("active");
+  }
+  onFilterChange();
+}
+
+function onTaskNameChange() { renderTaskSchemaSections(); onFilterChange(); runSearch(); }
+
+function buildMotionalAccordion() {
+  const el = document.getElementById("motionalAccordion");
+  el.innerHTML = MOTIONAL_CATEGORIES.map((group, gi) => `
+    <div class="accordion-cat" id="cat-${gi}">
+      <div class="accordion-head" onclick="toggleAccordion(${gi})">
+        <span>${group.cat}</span>
+        <span class="meta"><span class="cat-badge-count" id="catcount-${gi}"></span><span class="arrow">▶</span></span>
+      </div>
+      <div class="accordion-body">
+        ${group.tags.map(tag => `
+          <label class="chk">
+            <input type="checkbox" data-cat="${gi}" value="${tag}" onchange="onFilterChange()">
+            <span>${tag}</span>
+          </label>
+        `).join("")}
+      </div>
+    </div>
+  `).join("");
+  MOTIONAL_CATEGORIES.forEach((g, gi) => updateCatCount(gi));
+}
+buildMotionalAccordion();
+
+function toggleAccordion(gi) { document.getElementById(`cat-${gi}`).classList.toggle("open"); }
+
+function updateCatCount(gi) {
+  const checked = document.querySelectorAll(`#motionalAccordion input[data-cat="${gi}"]:checked`).length;
+  const badge = document.getElementById(`catcount-${gi}`);
+  badge.textContent = checked > 0 ? checked : "";
+  badge.style.display = checked > 0 ? "inline-block" : "none";
+}
+
+function getEnvFilters() {
+  const result = {};
+  document.querySelectorAll('#envSection select[data-env]').forEach(el => { if (el.value) result[el.dataset.env] = el.value; });
+  return result;
+}
+
+function getCheckedMotionalTags() {
+  return Array.from(document.querySelectorAll('#motionalAccordion input:checked')).map(el => el.value);
+}
+
+function onFilterChange() {
+  MOTIONAL_CATEGORIES.forEach((g, gi) => updateCatCount(gi));
+  updateStatFilters();
+  updateQueryPreview();
+}
+
+function updateStatFilters() {
+  const envCount = Object.keys(getEnvFilters()).length;
+  const targetCount = Object.keys(targetChipState).length;
+  const motionalCount = getCheckedMotionalTags().length;
+  document.getElementById("statFilters").textContent = envCount + targetCount + motionalCount;
+}
+
+function updateQueryPreview() {
+  const env = getEnvFilters();
+  const motionalTags = getCheckedMotionalTags();
+  const parts = [`<span class="tok-key">task:</span> <span class="tok-val">${currentTaskName()}</span>`];
+  Object.entries(env).forEach(([k, v]) => parts.push(`<span class="tok-key">${k}:</span> <span class="tok-val">${v}</span>`));
+  Object.entries(targetChipState).forEach(([k, set]) => {
+    parts.push(`<span class="tok-key">${k}:</span> <span class="tok-val">${Array.from(set).join("|")}</span>`);
+  });
+  if (motionalTags.length) parts.push(`<span class="tok-key">motional:</span> <span class="tok-val">${motionalTags.length}건(OR)</span>`);
+  document.getElementById("queryStrip").innerHTML = `query: ${parts.join(" AND ")}`;
+}
+
+function resetFilters() {
+  document.querySelectorAll('#envSection select[data-env]').forEach(el => el.value = "");
+  document.querySelectorAll('#targetSection .chip-toggle').forEach(b => b.classList.remove("active"));
+  targetChipState = {};
+  document.querySelectorAll('#motionalAccordion input[type=checkbox]').forEach(el => el.checked = false);
+  onFilterChange();
+  runSearch();
+}
+
+function buildQuery() {
+  const taskName = currentTaskName();
+  const schema = TASK_SCHEMAS[taskName];
+  const env = getEnvFilters();
+  const motionalTags = getCheckedMotionalTags();
+
+  const must = [{ term: { taskName: taskName } }];
+  if (schema) {
+    Object.entries(env).forEach(([k, v]) => must.push({ term: { [`${schema.tagFieldPrefix}${k}`]: v } }));
+    Object.entries(targetChipState).forEach(([k, set]) => {
+      const values = Array.from(set);
+      const field = `${schema.tagFieldPrefix}${k}`;
+      if (values.length === 1) must.push({ term: { [field]: values[0] } });
+      else must.push({ terms: { [field]: values } });
+    });
+  }
+  if (motionalTags.length) must.push({ terms: { motional_scenarios: motionalTags } });
+
+  return { bool: { must } };
+}
+
+async function runSearch(opts = {}) {
+  const silent = opts.silent === true;
+  if (!silent) {
+    document.getElementById("resultArea").innerHTML = `<div class="state-block"><div class="icon">…</div>검색 중</div>`;
+  }
+  document.getElementById("errorBox").innerHTML = "";
+  try {
+    const q = buildQuery();
+    const res = await fetch(API_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(q) });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    lastResults = data.hits;
+    document.getElementById("statTotal").textContent = data.hits.length;
+    document.getElementById("statMatched").textContent = data.hits.length;
+    renderResults(data.hits);
+  } catch (err) {
+    document.getElementById("errorBox").innerHTML = `<div class="error-box">검색 실패: ${err.message}</div>`;
+    if (!silent) document.getElementById("resultArea").innerHTML = "";
+    document.getElementById("statMatched").textContent = "오류";
+    document.getElementById("exportBtn").disabled = true;
+  }
+}
+
+function copyPath(btn, fullPath) {
+  navigator.clipboard.writeText(fullPath).then(() => {
+    const original = btn.textContent;
+    btn.textContent = "복사됨"; btn.classList.add("copied");
+    setTimeout(() => { btn.textContent = original; btn.classList.remove("copied"); }, 1200);
+  });
+}
+window.copyPath = copyPath;
+
+/** 카드 클릭 → 상세 검수 페이지로 이동 (현재 검색 조건과 위치를 함께 전달) */
+function openReview(startIndex) {
+  const ctx = {
+    taskName: currentTaskName(),
+    esQuery: buildQuery(),
+    queryLabel: document.getElementById("queryStrip").textContent.replace(/^query:\s*/, ""),
+    startIndex: startIndex,
+  };
+  try {
+    sessionStorage.setItem("odd_review_context", JSON.stringify(ctx));
+  } catch (e) { /* 저장 실패해도 URL 파라미터로 최소 동작 */ }
+  location.href = `/review.html?task=${encodeURIComponent(ctx.taskName)}`;
+}
+window.openReview = openReview;
+
+function renderResults(hits) {
+  document.getElementById("exportBtn").disabled = hits.length === 0;
+  if (hits.length === 0) { document.getElementById("resultArea").innerHTML = `<div class="state-block"><div class="icon">∅</div>조건에 맞는 프레임이 없습니다.</div>`; return; }
+
+  const taskName = currentTaskName();
+  const schema = TASK_SCHEMAS[taskName];
+
+  const cards = hits.map((h, idx) => {
+    const tagObjKey = `${taskName.toLowerCase()}_tags`;
+    const t = (schema && h.tags && h.tags[tagObjKey]) || {};
+    
+    const envChips = schema ? schema.envFields.filter(f => t[f.key]).map(f => `<span class="badge env">${t[f.key]}</span>`).join("") : "";
+    const presentChipsStr = schema ? schema.targetFields.filter(f => t[f] === "present").map(f => `<span class="tag-chip">${f}</span>`).join("") : "";
+    const unknownChipsStr = schema ? schema.targetFields.filter(f => t[f] === "unknown").map(f => `<span class="tag-chip unknown">${f}</span>`).join("") : "";
+    
+    const targetChips = `
+      ${presentChipsStr ? `<div class="chip-group">${presentChipsStr}</div>` : ''}
+      ${unknownChipsStr ? `<div class="chip-group" style="margin-top: 0px">${unknownChipsStr}</div>` : ''}
+      ${!presentChipsStr && !unknownChipsStr ? '<span style="color:var(--ink-faint); font-size:11px;">—</span>' : ''}
+    `;
+
+    // Motional: exact(이 시각에 실제 발생) vs nearby(±0.5초 padding으로 걸림) 구분
+    const exactSet = new Set(h.motional_exact || []);
+    const motional = (h.motional_scenarios || []).map(m => {
+      const isExact = exactSet.has(m);
+      const cls = isExact ? "badge motional" : "badge motional nearby";
+      const tip = isExact
+        ? "이 프레임 시각에 실제로 발생 중"
+        : "±0.5초 범위에서 매칭됨 (이 시각엔 미발생)";
+      return `<span class="${cls}" title="${tip}">${m}</span>`;
+    }).join("");
+
+    const fullPath = h.imagePath || "";
+    const safeFull = fullPath.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+
+    return `
+      <div class="result-card">
+        <div class="rc-image-wrap">
+          <img src="/api/image?path=${encodeURIComponent(fullPath)}" class="rc-image" loading="lazy" alt="Frame Image" onerror="this.alt='이미지를 불러올 수 없습니다';">
+        </div>
+
+        <div class="rc-info">
+          <div class="rc-head">
+            <div class="rc-head-item" style="width: 280px; flex-shrink: 0;">
+              <span class="rc-label">UUID</span>
+              <span class="rc-uuid">${h.uuid || "—"}</span>
+            </div>
+            <div class="rc-head-item" style="flex: 1; min-width: 0;">
+              <span class="rc-label">경로</span>
+              <div class="rc-path-wrap">
+                <span class="rc-path" onclick="this.classList.toggle('expanded')" title="클릭하면 전체 경로가 펼쳐집니다">${fullPath}</span>
+                <button class="path-copy-btn" onclick="copyPath(this, '${safeFull}')">⧉ 복사</button>
+                <button class="path-copy-btn review-btn" onclick="openReview(${idx})" title="이 프레임부터 상세 검수 화면 열기">▶ 검수</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="rc-body">
+            <div class="rc-col">
+              <div class="rc-col-title">촬영 조건</div>
+              <div class="chip-group">${envChips || '<span style="color:var(--ink-faint); font-size:11px;">—</span>'}</div>
+            </div>
+            <div class="rc-col">
+              <div class="rc-col-title">Present / Unknown 속성</div>
+              <div class="chip-group">${targetChips}</div>
+            </div>
+            <div class="rc-col">
+              <div class="rc-col-title">Motional</div>
+              <div class="chip-group">${motional || '<span style="color:var(--ink-faint); font-size:11px;">—</span>'}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  document.getElementById("resultArea").innerHTML = `<div class="result-list">${cards}</div>`;
+}
+
+function exportCSV() {
+  if (lastResults.length === 0) return;
+  const taskName = currentTaskName();
+  const schema = TASK_SCHEMAS[taskName];
+  const fieldKeys = schema ? [...schema.envFields.map(f => f.key), ...schema.targetFields] : [];
+  const header = ["uuid", "taskName", "imagePath", ...fieldKeys, "motional_scenarios", "motional_exact"];
+  const rows = lastResults.map(h => {
+    const tagObjKey = `${taskName.toLowerCase()}_tags`;
+    const t = (schema && h.tags && h.tags[tagObjKey]) || {};
+    const motional = (h.motional_scenarios || []).join(";");
+    const motionalExact = (h.motional_exact || []).join(";");
+    const values = fieldKeys.map(k => t[k] || "");
+    return [h.uuid, h.taskName, h.imagePath, ...values, motional, motionalExact]
+      .map(v => `"${(v ?? "").toString().replace(/"/g, '""')}"`).join(",");
+  });
+  const csv = [header.join(","), ...rows].join("\n");
+  const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = `odd_search_result_${new Date().toISOString().slice(0,10)}.csv`; a.click();
+  URL.revokeObjectURL(url);
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+  renderTaskSchemaSections();
+  onFilterChange();
+  runSearch();
+  checkForUpdates();
+  startAutoRefresh();
+});
+</script>
+
+</body>
+</html>

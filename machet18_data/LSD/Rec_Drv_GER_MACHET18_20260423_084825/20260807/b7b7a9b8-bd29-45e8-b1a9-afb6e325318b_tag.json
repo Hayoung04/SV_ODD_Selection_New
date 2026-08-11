@@ -1,0 +1,22 @@
+{
+  "uuid": "b7b7a9b8-bd29-45e8-b1a9-afb6e325318b",
+  "taskName": "LSD",
+  "promptVersion": "lsd_prompt_v1.1",
+  "imagePath": "/mnt/data-center/scenes/GER/MACHET18/260423/Rec_Drv_GER_MACHET18_20260423_084825/images/2160p_h120_front/GER_MACHET18_20260423_084825_1776926941199248_2160p_h120_front.jpg",
+  "tags": {
+    "lsd_tags": {
+      "low_streetlight_road": "unknown",
+      "oncoming_vehicle_far_60m": "absent",
+      "oncoming_vehicle_taillight_cluster": "absent",
+      "motorbike_headlamp": "absent",
+      "reflector_guardrail": "present",
+      "reflector_lane_divider": "present",
+      "reflector_tunnel_lowmid_light": "absent",
+      "reflector_white_all": "present",
+      "sign_strong_light_reflection": "absent",
+      "sign_white_heavy_reflection": "absent",
+      "camera_torn_frame": "absent"
+    }
+  },
+  "rawModelResponse": "The following analysis considers the provided night-driving severity and light source data attributes. The displayed image is a bright daytime scene, not night. No light-emitting sources common in night driving (headlamps, tail lights, streetlights at night) are visible. The analysis below follows the rules for judging each tag:\n\n{\n  \"lsd_tags\": {\n    \"low_streetlight_road\": \"unknown\",\n    \"oncoming_vehicle_far_60m\": \"absent\",\n    \"oncoming_vehicle_taillight_cluster\": \"absent\",\n    \"motorbike_headlamp\": \"absent\",\n    \"reflector_guardrail\": \"present\",\n    \"reflector_lane_divider\": \"present\",\n    \"reflector_tunnel_lowmid_light\": \"absent\",\n    \"reflector_white_all\": \"present\",\n    \"sign_strong_light_reflection\": \"absent\",\n    \"sign_white_heavy_reflection\": \"absent\",\n    \"camera_torn_frame\": \"absent\"\n  }\n}"
+}

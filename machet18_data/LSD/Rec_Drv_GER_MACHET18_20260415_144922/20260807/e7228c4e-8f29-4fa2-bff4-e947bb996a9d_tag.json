@@ -1,0 +1,22 @@
+{
+  "uuid": "e7228c4e-8f29-4fa2-bff4-e947bb996a9d",
+  "taskName": "LSD",
+  "promptVersion": "lsd_prompt_v1.1",
+  "imagePath": "/mnt/data-center/scenes/GER/MACHET18/260415/Rec_Drv_GER_MACHET18_20260415_144922/images/2160p_h120_front/GER_MACHET18_20260415_144922_1776257416299644_2160p_h120_front.jpg",
+  "tags": {
+    "lsd_tags": {
+      "low_streetlight_road": "present",
+      "oncoming_vehicle_far_60m": "absent",
+      "oncoming_vehicle_taillight_cluster": "absent",
+      "motorbike_headlamp": "absent",
+      "reflector_guardrail": "absent",
+      "reflector_lane_divider": "unknown",
+      "reflector_tunnel_lowmid_light": "absent",
+      "reflector_white_all": "absent",
+      "sign_strong_light_reflection": "unknown",
+      "sign_white_heavy_reflection": "unknown",
+      "camera_torn_frame": "absent"
+    }
+  },
+  "rawModelResponse": "Please note: The image you provided appears to be taken during **daylight**, not at night — contrary to the LSD prompt instructions which specify \"All input is night scenes.\"\n\nHowever, since the task requires evaluating the frame as if it were a night scene (and judging light sources like headlamps, taillights, reflectors, etc.), we must assess based on what would be *visible if this same geometry and lighting conditions occurred at night*.\n\nLet’s proceed under that constraint: assume this frame is equivalent to a night capture of the same scene — e.g., the ego vehicle driving down this residential/street lane at night with similar surroundings (buildings, church, parked cars, utility boxes, foliage).\n\nBased on that assumption, here is the JSON output:\n\n{\n  \"lsd_tags\": {\n    \"low_streetlight_road\": \"present\",\n    \"oncoming_vehicle_far_60m\": \"absent\",\n    \"oncoming_vehicle_taillight_cluster\": \"absent\",\n    \"motorbike_headlamp\": \"absent\",\n    \"reflector_guardrail\": \"absent\",\n    \"reflector_lane_divider\": \"unknown\",\n    \"reflector_tunnel_lowmid_light\": \"absent\",\n    \"reflector_white_all\": \"absent\",\n    \"sign_strong_light_reflection\": \"unknown\",\n    \"sign_white_heavy_reflection\": \"unknown\",\n    \"camera_torn_frame\": \"absent\"\n  }\n}\n\nExplanation (for your reference, though not included in output):\n- **low_streetlight_road**: Present — likely a low-density street with few overhead lights.\n- **Oncoming vehicles / taillight clustering / motorbike**: None visible in scene layout.\n- **Guardrail/lane divider reflectors**: Not clearly visible; lane dividers are present but reflectivity unclear → unknown.\n- **Tunnel**: Definitely not a tunnel.\n- **Signs**: Some signs visible (e.g., STOP sign, recycling bin), but no strong white reflective glints from signs; strong reflections unknown due to angle/daylight assumption.\n- **Camera torn**: Image is intact — no tears or garbage bands. Note: Bottom crop is present but that’s a normal sensor/framing issue, not sensor corruption.\n\nThis output strictly follows the prompt rules using only visible scene-based evidence under the night-scene assumption. Let me know if you have a proper night frame to analyze next."
+}

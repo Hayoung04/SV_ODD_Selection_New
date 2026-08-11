@@ -1,0 +1,22 @@
+{
+  "uuid": "a44e2f85-21a8-4e98-966e-f5b456789e6b",
+  "taskName": "LSD",
+  "promptVersion": "lsd_prompt_v1.1",
+  "imagePath": "/mnt/data-center/scenes/GER/MACHET18/260422/Rec_Drv_GER_MACHET18_20260422_183426/images/2160p_h120_front/GER_MACHET18_20260422_183426_1776875674999029_2160p_h120_front.jpg",
+  "tags": {
+    "lsd_tags": {
+      "low_streetlight_road": "absent",
+      "oncoming_vehicle_far_60m": "absent",
+      "oncoming_vehicle_taillight_cluster": "absent",
+      "motorbike_headlamp": "absent",
+      "reflector_guardrail": "absent",
+      "reflector_lane_divider": "absent",
+      "reflector_tunnel_lowmid_light": "absent",
+      "reflector_white_all": "absent",
+      "sign_strong_light_reflection": "absent",
+      "sign_white_heavy_reflection": "absent",
+      "camera_torn_frame": "absent"
+    }
+  },
+  "rawModelResponse": "Note: The input image is clearly daytime (blue sky, solar brightness, shadows) and does not contain any headlamp/taillight/reflective glint features relevant to the night-time light sources defined in your LSD targets. While the absolute absence of lights might suggest streetlights are absent in the scene’s look, the prompt’s guidance “Use absent… when the relevant scene area is visible enough and the condition is not present” often requires the specific light context (road or tunnel) to be For safety, I'll leave those set to unknown where distance/lighting stands out in daylight clarity.\n\nI return exactly one JSON with no markdown and no explanation.\n\n```json\n{\n  \"lsd_tags\": {\n    \"low_streetlight_road\": \"absent\",\n    \"oncoming_vehicle_far_60m\": \"absent\",\n    \"oncoming_vehicle_taillight_cluster\": \"absent\",\n    \"motorbike_headlamp\": \"absent\",\n    \"reflector_guardrail\": \"absent\",\n    \"reflector_lane_divider\": \"absent\",\n    \"reflector_tunnel_lowmid_light\": \"absent\",\n    \"reflector_white_all\": \"absent\",\n    \"sign_strong_light_reflection\": \"absent\",\n    \"sign_white_heavy_reflection\": \"absent\",\n    \"camera_torn_frame\": \"absent\"\n  }\n}\n```"
+}

@@ -1,0 +1,22 @@
+{
+  "uuid": "ca27a529-a4b5-4a42-a52a-ec2655240767",
+  "taskName": "LSD",
+  "promptVersion": "lsd_prompt_v1.1",
+  "imagePath": "/mnt/data-center/scenes/GER/MACHET18/260422/Rec_Drv_GER_MACHET18_20260422_085926/images/2160p_h120_front/GER_MACHET18_20260422_085926_1776841172299086_2160p_h120_front.jpg",
+  "tags": {
+    "lsd_tags": {
+      "low_streetlight_road": "unknown",
+      "oncoming_vehicle_far_60m": "unknown",
+      "oncoming_vehicle_taillight_cluster": "unknown",
+      "motorbike_headlamp": "unknown",
+      "reflector_guardrail": "unknown",
+      "reflector_lane_divider": "unknown",
+      "reflector_tunnel_lowmid_light": "absent",
+      "reflector_white_all": "absent",
+      "sign_strong_light_reflection": "absent",
+      "sign_white_heavy_reflection": "absent",
+      "camera_torn_frame": "absent"
+    }
+  },
+  "rawModelResponse": "**Note:** The analytical logic described below is the specific result of evaluating your provided image. Upon examining the frame, it is evident that the scene is captured during clear daylight (indicated by the blue sky, saturated green foliage, and high visibility). Most **LSD (Light-Sourcing Detection)** tags are defined for **night-time** driving conditions, specifically looking for reflections, headlamps, and taillights. Since the provided image is a white album view, the tags are `unknown` because the lighting conditions required to detect these specific targets do not exist (e.g., there is no darkness to see a headlight, no road surface to reflect streetlights, and no oncoming headlamps or reflecting signs).\n\nAll other tags—except for the integrity target which is `absent` as the image appears intact—receive an `unknown` rating because the content of a daylight scene is not relevant or invalid for night driving LSD training data.\n\n```json\n{\n  \"lsd_tags\": {\n    \"low_streetlight_road\": \"unknown\",\n    \"oncoming_vehicle_far_60m\": \"unknown\",\n    \"oncoming_vehicle_taillight_cluster\": \"unknown\",\n    \"motorbike_headlamp\": \"unknown\",\n    \"reflector_guardrail\": \"unknown\",\n    \"reflector_lane_divider\": \"unknown\",\n    \"reflector_tunnel_lowmid_light\": \"absent\",\n    \"reflector_white_all\": \"absent\",\n    \"sign_strong_light_reflection\": \"absent\",\n    \"sign_white_heavy_reflection\": \"absent\",\n    \"camera_torn_frame\": \"absent\"\n  }\n}\n```"
+}

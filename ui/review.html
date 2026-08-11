@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ODD Frame Review</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f4f5fa; --panel: #ffffff; --line: #ecedf4;
+    --ink: #1e2130; --ink-soft: #8085a0; --ink-faint: #a7abc0;
+    --accent: #7300f0; --accent-2: #9333f5; --accent-wash: #f3e6fe; --accent-ink: #6200d1;
+    --green: #17a673; --green-wash: #e7f8f1;
+    --amber: #d98a1c; --amber-wash: #fdf3e2;
+    --blue: #2f7ff0; --blue-wash: #e9f2ff;
+    --red: #e0435a; --red-wash: #fdeaed;
+    --radius-lg: 16px; --radius-md: 12px; --radius-sm: 8px;
+    --shadow: 0 1px 2px rgba(20,20,50,0.04), 0 4px 16px rgba(20,20,50,0.05);
+    --font: 'Inter', sans-serif;
+    --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body { font-family: var(--font); background: var(--bg); color: var(--ink); -webkit-font-smoothing: antialiased; display: flex; flex-direction: column; }
+
+  .header { background: var(--panel); border-bottom: 1px solid var(--line); padding: 14px 26px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; flex-shrink: 0; }
+  .logo { display: flex; align-items: center; gap: 9px; }
+  .logo-mark { width: 30px; height: 30px; border-radius: 9px; background: linear-gradient(135deg, var(--accent), var(--accent-2)); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 13px; }
+  .logo-text { font-weight: 700; font-size: 15px; }
+  .logo-sub { font-size: 11px; color: var(--ink-faint); margin-top: -2px; }
+  .header-query { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; background: var(--bg); border: 1px solid var(--line); border-radius: 999px; padding: 8px 16px; font-family: var(--font-mono); font-size: 12px; overflow-x: auto; white-space: nowrap; }
+  .hq-label { color: var(--ink-faint); font-weight: 600; }
+  .hq-task { background: var(--accent-wash); color: var(--accent-ink); font-weight: 700; padding: 2px 9px; border-radius: 999px; }
+  .hq-val { color: var(--accent-ink); font-weight: 600; }
+  .hq-sep { color: var(--ink-faint); }
+
+  /* 검수자 입력 */
+  .reviewer-box { display: flex; align-items: center; gap: 7px; background: var(--bg); border: 1px solid var(--line); border-radius: 999px; padding: 5px 8px 5px 13px; }
+  .reviewer-box label { font-size: 11px; color: var(--ink-faint); font-weight: 600; }
+  .reviewer-box input { border: none; background: white; border-radius: 999px; padding: 5px 11px; font-family: var(--font-mono); font-size: 11.5px; width: 108px; outline: none; border: 1px solid var(--line); }
+  .reviewer-box input:focus { border-color: var(--accent); }
+
+  .btn { font-family: var(--font); font-weight: 600; font-size: 13px; border-radius: var(--radius-sm); border: none; padding: 9px 15px; cursor: pointer; transition: opacity 0.12s, transform 0.05s; }
+  .btn:active { transform: translateY(1px); }
+  .btn-ghost { background: white; color: var(--ink-soft); border: 1px solid var(--line); }
+  .btn-ghost:hover { background: var(--bg); }
+  .btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: white; }
+
+  .main { flex: 1; display: grid; grid-template-columns: 290px minmax(0,1fr) 340px; gap: 16px; padding: 16px 26px; min-height: 0; }
+  @media (max-width: 1400px) { .main { grid-template-columns: 240px minmax(0,1fr) 300px; } }
+  @media (max-width: 1100px) { .main { grid-template-columns: 1fr; } }
+
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow); display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+  .panel-head { padding: 13px 16px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+  .panel-title { font-size: 12.5px; font-weight: 700; }
+  .panel-count { font-size: 11px; color: var(--ink-faint); font-family: var(--font-mono); }
+  .panel-body { flex: 1; overflow-y: auto; min-height: 0; }
+  .panel-body::-webkit-scrollbar { width: 6px; }
+  .panel-body::-webkit-scrollbar-thumb { background: #d3d5e2; border-radius: 4px; }
+
+  .result-item { padding: 11px 14px; border-bottom: 1px solid var(--line); cursor: pointer; display: flex; gap: 11px; align-items: center; transition: background 0.1s; border-left: 3px solid transparent; }
+  .result-item:hover { background: #fafbff; }
+  .result-item.active { background: var(--accent-wash); border-left-color: var(--accent); }
+  .ri-thumb { width: 62px; height: 38px; object-fit: cover; border-radius: 5px; background: #1e2130; flex-shrink: 0; }
+  .ri-meta { min-width: 0; flex: 1; }
+  .ri-title { font-family: var(--font-mono); font-size: 11px; font-weight: 600; }
+  .ri-sub { font-size: 10.5px; color: var(--ink-faint); font-family: var(--font-mono); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ri-status { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; background: #dcdee8; }
+  .ri-status.accept { background: var(--green); }
+  .ri-status.reject { background: var(--red); }
+  .ri-status.pending { background: var(--amber); }
+  .ri-other { font-size: 8.5px; color: var(--ink-faint); font-family: var(--font-mono); }
+
+  .center-stack { display: flex; flex-direction: column; gap: 16px; min-height: 0; }
+  .video-panel { flex-shrink: 0; }
+
+  .video-stage { background: #12141c; position: relative; display: flex; align-items: center; justify-content: center; aspect-ratio: 21 / 9; max-height: 42vh; border: 4px solid transparent; transition: border-color 0.15s, box-shadow 0.15s; }
+  .video-stage.on-target { border-color: var(--accent); box-shadow: 0 0 0 1px rgba(255,255,255,0.12) inset, 0 0 30px rgba(115,0,240,0.55); }
+  .video-stage video, .video-stage img { width: 100%; height: 100%; object-fit: contain; display: block; }
+
+  .target-banner { position: absolute; top: 0; left: 0; right: 0; background: linear-gradient(to bottom, rgba(115,0,240,0.95), rgba(115,0,240,0)); color: white; padding: 9px 14px 24px; font-size: 13px; font-weight: 800; display: none; align-items: center; gap: 9px; }
+  .video-stage.on-target .target-banner { display: flex; }
+  .target-banner .pulse-dot { width: 9px; height: 9px; border-radius: 50%; background: white; animation: pulseDot 1.1s infinite; }
+  @keyframes pulseDot { 0%,100% { opacity: 1; transform: scale(1);} 50% { opacity: 0.3; transform: scale(0.7);} }
+
+  .context-note { position: absolute; top: 10px; left: 12px; background: rgba(30,33,48,0.75); color: #c9ccdb; font-size: 10.5px; font-weight: 600; padding: 4px 10px; border-radius: 999px; }
+  .video-stage.on-target .context-note { display: none; }
+  .stage-badge { position: absolute; top: 10px; right: 12px; padding: 4px 10px; border-radius: 999px; font-size: 10.5px; font-weight: 600; color: white; background: rgba(128,133,160,0.85); }
+  .fallback-note { position: absolute; bottom: 10px; left: 12px; background: rgba(217,138,28,0.9); color: white; font-size: 10px; font-weight: 600; padding: 3px 9px; border-radius: 999px; display: none; }
+
+  .video-controls { padding: 11px 16px; display: flex; align-items: center; gap: 12px; border-top: 1px solid var(--line); }
+  .ctrl-btn { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--line); background: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }
+  .ctrl-btn:hover { background: var(--accent-wash); border-color: var(--accent); color: var(--accent-ink); }
+  .ctrl-btn.primary { background: var(--accent-wash); border-color: rgba(115,0,240,0.3); color: var(--accent-ink); width: auto; border-radius: var(--radius-sm); padding: 0 12px; font-size: 11.5px; font-weight: 700; }
+  .ctrl-btn.primary:hover { background: var(--accent); color: white; }
+
+  .timeline-wrap { flex: 1; position: relative; height: 30px; display: flex; align-items: center; cursor: pointer; }
+  .timeline-track { position: absolute; left: 0; right: 0; height: 6px; background: #e6e8f0; border-radius: 999px; }
+  .timeline-context { position: absolute; height: 6px; background: rgba(128,133,160,0.28); border-radius: 999px; }
+  .timeline-played { position: absolute; height: 6px; background: #b9bdd0; border-radius: 999px; }
+  .timeline-target { position: absolute; width: 3px; height: 20px; background: var(--accent); border-radius: 2px; transform: translateX(-50%); pointer-events: none; box-shadow: 0 0 7px rgba(115,0,240,0.7); }
+  .timeline-target::after { content: "검수"; position: absolute; top: -15px; left: 50%; transform: translateX(-50%); font-size: 8.5px; font-weight: 800; color: var(--accent-ink); background: var(--accent-wash); padding: 1px 4px; border-radius: 3px; white-space: nowrap; }
+  .timeline-head { position: absolute; width: 12px; height: 12px; border-radius: 50%; background: white; border: 2.5px solid var(--ink-soft); transform: translateX(-50%); box-shadow: 0 1px 4px rgba(0,0,0,0.2); pointer-events: none; }
+  .time-readout { font-family: var(--font-mono); font-size: 11.5px; color: var(--ink-soft); white-space: nowrap; }
+
+  .gantt-panel { flex: 1; min-height: 0; }
+  .gantt-scroll { overflow: auto; height: 100%; }
+  .gantt-grid { position: relative; min-width: 640px; padding: 10px 16px 4px; }
+  .gantt-row { display: grid; grid-template-columns: 215px 1fr; align-items: center; height: 22px; }
+  .gantt-label { font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-soft); text-align: right; padding-right: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .gantt-row.is-active .gantt-label { color: var(--accent-ink); font-weight: 700; }
+  .gantt-lane { position: relative; height: 22px; }
+  .gantt-lane::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: #f0f1f7; }
+  .gantt-bar { position: absolute; top: 5px; height: 12px; border-radius: 3px; background: #dcdee8; min-width: 3px; cursor: pointer; transition: transform 0.1s; }
+  .gantt-bar:hover { transform: scaleY(1.3); }
+  .gantt-bar.matched { background: #b39ddb; }
+  .gantt-bar.playing { background: var(--accent); box-shadow: 0 0 0 2px rgba(115,0,240,0.35); }
+  .gantt-context-band { position: absolute; top: 0; bottom: 22px; background: rgba(128,133,160,0.09); border-left: 1px dashed rgba(128,133,160,0.5); border-right: 1px dashed rgba(128,133,160,0.5); pointer-events: none; z-index: 2; }
+  .gantt-target-line { position: absolute; top: 0; bottom: 22px; width: 2.5px; background: var(--accent); pointer-events: none; z-index: 4; box-shadow: 0 0 8px rgba(115,0,240,0.6); }
+  .gantt-playhead { position: absolute; top: 0; bottom: 22px; width: 1.5px; background: rgba(128,133,160,0.8); pointer-events: none; z-index: 3; }
+  .gantt-axis { display: grid; grid-template-columns: 215px 1fr; border-top: 1px solid var(--line); margin-top: 4px; padding-top: 5px; }
+  .gantt-axis-ticks { position: relative; height: 16px; }
+  .gantt-tick { position: absolute; font-family: var(--font-mono); font-size: 9.5px; color: var(--ink-faint); transform: translateX(-50%); }
+
+  .target-card { margin: 14px 16px; padding: 12px; border-radius: var(--radius-md); background: linear-gradient(135deg, var(--accent-wash), #fbf7ff); border: 1.5px solid rgba(115,0,240,0.3); }
+  .target-card-title { font-size: 10.5px; font-weight: 800; color: var(--accent-ink); letter-spacing: 0.04em; margin-bottom: 8px; }
+  .target-thumb { width: 100%; border-radius: var(--radius-sm); background: #12141c; display: block; margin-bottom: 8px; }
+  .target-meta { font-family: var(--font-mono); font-size: 10.5px; color: var(--accent-ink); line-height: 1.7; }
+  .other-reviewer { margin-top: 7px; padding: 6px 8px; background: rgba(255,255,255,0.75); border-radius: 6px; font-size: 10px; color: var(--ink-soft); font-family: var(--font-mono); }
+
+  .tag-section { padding: 14px 16px; border-bottom: 1px solid var(--line); }
+  .tag-section:last-child { border-bottom: none; }
+  .tag-section-title { font-size: 10.5px; font-weight: 700; color: var(--ink-faint); letter-spacing: 0.04em; margin-bottom: 9px; text-transform: uppercase; display: flex; justify-content: space-between; }
+  .section-hint { font-size: 9.5px; font-weight: 500; text-transform: none; letter-spacing: 0; }
+  .chip-group { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { display: inline-flex; align-items: center; border-radius: 6px; padding: 4px 8px; font-size: 10.5px; font-weight: 600; font-family: var(--font-mono); white-space: nowrap; }
+  .chip.odd { background: var(--accent-wash); color: var(--accent-ink); border: 1px solid rgba(115,0,240,0.15); }
+  .chip.odd.unknown { background: var(--amber-wash); color: var(--amber); border: 1px solid rgba(217,138,28,0.2); }
+  .chip.env { background: var(--blue-wash); color: var(--blue); border: 1px solid rgba(47,127,240,0.15); }
+  .chip-empty { color: var(--ink-faint); font-size: 11px; }
+
+  .event-list { display: flex; flex-direction: column; gap: 7px; }
+  .event-card { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px 10px; cursor: pointer; background: white; transition: all 0.12s; display: flex; flex-direction: column; gap: 4px; }
+  .event-card:hover { border-color: var(--ink-soft); background: #fafbfd; }
+  .event-card.playing { border-color: var(--accent); background: #fcfaff; }
+  .ec-name { font-family: var(--font-mono); font-size: 11px; font-weight: 700; word-break: break-all; }
+  .event-card.nearby .ec-name { color: var(--ink-soft); font-weight: 500; }
+  .ec-meta { display: flex; justify-content: space-between; align-items: center; font-family: var(--font-mono); font-size: 9.5px; color: var(--ink-faint); }
+  .ec-tag { padding: 1px 6px; border-radius: 999px; font-weight: 700; font-size: 9px; }
+  .ec-tag.exact { background: #d6f0e5; color: #0f7a53; }
+  .ec-tag.nearby { background: #f0f1f7; color: var(--ink-faint); }
+
+  .nav-row { display: flex; gap: 8px; padding: 14px 16px 0; }
+  .nav-btn { flex: 1; padding: 10px; border: 1px solid var(--line); background: white; border-radius: var(--radius-sm); cursor: pointer; font-size: 14px; font-weight: 600; }
+  .nav-btn:hover:not(:disabled) { background: var(--accent-wash); border-color: var(--accent); color: var(--accent-ink); }
+  .nav-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .nav-pos { display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 12px; color: var(--ink-soft); min-width: 72px; }
+
+  .dashboard { background: var(--panel); border-top: 1px solid var(--line); padding: 14px 26px; display: flex; align-items: center; gap: 26px; flex-wrap: wrap; flex-shrink: 0; }
+  .action-group { display: flex; gap: 9px; }
+  .action-btn { padding: 11px 22px; border-radius: var(--radius-sm); border: 1.5px solid; font-weight: 700; font-size: 13.5px; cursor: pointer; background: white; transition: all 0.1s; }
+  .action-btn.accept { border-color: var(--green); color: var(--green); }
+  .action-btn.accept:hover, .action-btn.accept.on { background: var(--green); color: white; }
+  .action-btn.reject { border-color: var(--red); color: var(--red); }
+  .action-btn.reject:hover, .action-btn.reject.on { background: var(--red); color: white; }
+  .action-btn.pending { border-color: var(--amber); color: var(--amber); }
+  .action-btn.pending:hover, .action-btn.pending.on { background: var(--amber); color: white; }
+  .action-hint { font-size: 10.5px; color: var(--ink-faint); font-family: var(--font-mono); margin-top: 6px; }
+  .sync-state { font-size: 10px; color: var(--ink-faint); font-family: var(--font-mono); margin-top: 3px; }
+  .sync-state.saving { color: var(--amber); }
+  .sync-state.saved { color: var(--green); }
+  .sync-state.error { color: var(--red); }
+
+  .stat-block { display: flex; align-items: center; gap: 20px; }
+  .donut-wrap { position: relative; width: 74px; height: 74px; flex-shrink: 0; }
+  .donut-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; }
+  .donut-pct { font-size: 15px; font-weight: 700; line-height: 1; }
+  .donut-lbl { font-size: 9px; color: var(--ink-faint); margin-top: 1px; }
+  .legend { display: flex; flex-direction: column; gap: 6px; }
+  .legend-row { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; }
+  .legend-name { color: var(--ink-soft); min-width: 56px; }
+  .legend-val { font-weight: 700; font-family: var(--font-mono); }
+
+  .progress-block { flex: 1; min-width: 180px; }
+  .progress-head { display: flex; justify-content: space-between; font-size: 11.5px; color: var(--ink-soft); margin-bottom: 6px; }
+  .progress-bar { height: 9px; border-radius: 999px; background: #eceef5; overflow: hidden; display: flex; }
+  .progress-seg { height: 100%; }
+  .progress-seg.accept { background: var(--green); }
+  .progress-seg.reject { background: var(--red); }
+  .progress-seg.pending { background: var(--amber); }
+
+  .state-block { text-align: center; padding: 40px 20px; color: var(--ink-faint); font-size: 13px; }
+  #toastContainer { position: fixed; top: 18px; right: 18px; z-index: 9999; display: flex; flex-direction: column; gap: 9px; pointer-events: none; }
+  .toast { background: var(--ink); color: white; padding: 11px 16px; border-radius: var(--radius-md); box-shadow: 0 8px 26px rgba(20,20,50,0.28); font-size: 12.5px; font-weight: 500; animation: toastIn 0.25s cubic-bezier(0.16,1,0.3,1); }
+  .toast.err { background: var(--red); }
+  @keyframes toastIn { from { opacity:0; transform: translateX(30px);} to {opacity:1; transform:none;} }
+</style>
+</head>
+<body>
+
+<div id="toastContainer"></div>
+
+<header class="header">
+  <div class="logo">
+    <div class="logo-mark">OD</div>
+    <div>
+      <div class="logo-text">Frame Review</div>
+      <div class="logo-sub">프레임 단위 검수</div>
+    </div>
+  </div>
+  <div class="header-query">
+    <span class="hq-label">Task</span>
+    <span class="hq-task" id="hqTask">—</span>
+    <span class="hq-sep">|</span>
+    <span class="hq-label">Query</span>
+    <span class="hq-val" id="hqQuery">—</span>
+  </div>
+  <div class="reviewer-box">
+    <label for="reviewerInput">검수자</label>
+    <input id="reviewerInput" placeholder="이름" onchange="saveReviewerName()">
+  </div>
+  <button class="btn btn-ghost" onclick="location.href='/index.html'">← 검색으로</button>
+  <button class="btn btn-primary" onclick="exportReviewCSV()">↓ Export CSV</button>
+</header>
+
+<div class="main">
+  <aside class="panel">
+    <div class="panel-head">
+      <span class="panel-title">검색 결과</span>
+      <span class="panel-count" id="listCount">0건</span>
+    </div>
+    <div class="panel-body" id="resultList"></div>
+  </aside>
+
+  <div class="center-stack">
+    <div class="panel video-panel">
+      <div class="video-stage" id="videoStage">
+        <video id="player" preload="metadata" playsinline></video>
+        <img id="framePlayer" style="display:none;" alt="frame">
+        <div class="target-banner"><span class="pulse-dot"></span><span>◉ 검수 대상 프레임</span></div>
+        <div class="context-note">참고 재생 중 · 검수 대상 아님</div>
+        <div class="stage-badge" id="modeBadge">검수 프레임 기준</div>
+        <div class="fallback-note" id="fallbackNote">영상 없음 · 프레임 재생</div>
+      </div>
+      <div class="video-controls">
+        <button class="ctrl-btn" id="playBtn" onclick="togglePlay()">▶</button>
+        <button class="ctrl-btn primary" onclick="jumpToTarget()">◉ 검수 프레임</button>
+        <div class="timeline-wrap" id="timelineWrap">
+          <div class="timeline-track"></div>
+          <div class="timeline-context" id="tlContext"></div>
+          <div class="timeline-played" id="tlPlayed"></div>
+          <div class="timeline-target" id="tlTarget"></div>
+          <div class="timeline-head" id="tlHead"></div>
+        </div>
+        <span class="time-readout" id="timeReadout">0.0s / 0.0s</span>
+      </div>
+    </div>
+
+    <div class="panel gantt-panel">
+      <div class="panel-head">
+        <span class="panel-title">Motional 타임라인 <span style="font-weight:500;color:var(--ink-faint);font-size:11px;">(판단 참고용)</span></span>
+        <span class="panel-count" id="ganttMeta">—</span>
+      </div>
+      <div class="panel-body">
+        <div class="gantt-scroll"><div class="gantt-grid" id="ganttGrid"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <aside class="panel">
+    <div class="nav-row">
+      <button class="nav-btn" id="prevBtn" onclick="goPrev()">‹</button>
+      <div class="nav-pos" id="navPos">– / –</div>
+      <button class="nav-btn" id="nextBtn" onclick="goNext()">›</button>
+    </div>
+    <div class="panel-body">
+      <div class="target-card">
+        <div class="target-card-title">◉ 지금 검수할 프레임</div>
+        <img class="target-thumb" id="targetThumb" alt="검수 대상">
+        <div class="target-meta" id="targetMeta"></div>
+        <div class="other-reviewer" id="otherReviewer" style="display:none;"></div>
+      </div>
+      <div class="tag-section">
+        <div class="tag-section-title">촬영 조건</div>
+        <div class="chip-group" id="envChips"></div>
+      </div>
+      <div class="tag-section">
+        <div class="tag-section-title">ODD 속성 (present / unknown)</div>
+        <div class="chip-group" id="oddChips"></div>
+      </div>
+      <div class="tag-section">
+        <div class="tag-section-title">
+          <span>Motional 이벤트</span>
+          <span class="section-hint" style="color:var(--ink-faint)">클릭 → 참고 재생</span>
+        </div>
+        <div class="event-list" id="eventList"></div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<footer class="dashboard">
+
+  <div class="stat-block">
+    <div class="donut-wrap">
+      <svg viewBox="0 0 42 42" width="74" height="74">
+        <circle cx="21" cy="21" r="15.9" fill="none" stroke="#eceef5" stroke-width="5.5"></circle>
+        <circle id="donutAccept"  cx="21" cy="21" r="15.9" fill="none" stroke="#17a673" stroke-width="5.5" stroke-dasharray="0 100" stroke-dashoffset="25"></circle>
+        <circle id="donutReject"  cx="21" cy="21" r="15.9" fill="none" stroke="#e0435a" stroke-width="5.5" stroke-dasharray="0 100" stroke-dashoffset="25"></circle>
+        <circle id="donutPending" cx="21" cy="21" r="15.9" fill="none" stroke="#d98a1c" stroke-width="5.5" stroke-dasharray="0 100" stroke-dashoffset="25"></circle>
+      </svg>
+      <div class="donut-center">
+        <span class="donut-pct" id="donutPct">0%</span>
+        <span class="donut-lbl">검수완료</span>
+      </div>
+    </div>
+    <div class="legend">
+      <div class="legend-row"><span class="legend-dot" style="background:var(--green)"></span><span class="legend-name">Accept</span><span class="legend-val" id="cntAccept">0</span></div>
+      <div class="legend-row"><span class="legend-dot" style="background:var(--red)"></span><span class="legend-name">Reject</span><span class="legend-val" id="cntReject">0</span></div>
+      <div class="legend-row"><span class="legend-dot" style="background:var(--amber)"></span><span class="legend-name">Pending</span><span class="legend-val" id="cntPending">0</span></div>
+      <div class="legend-row"><span class="legend-dot" style="background:#dcdee8"></span><span class="legend-name">미검수</span><span class="legend-val" id="cntNone">0</span></div>
+    </div>
+  </div>
+
+  <div class="progress-block">
+    <div class="progress-head"><span>검수 진행률 (전체 검수자 합산)</span><span id="progressText">0 / 0</span></div>
+    <div class="progress-bar">
+      <div class="progress-seg accept"  id="segAccept"  style="width:0%"></div>
+      <div class="progress-seg reject"  id="segReject"  style="width:0%"></div>
+      <div class="progress-seg pending" id="segPending" style="width:0%"></div>
+    </div>
+  </div>
+
+  <div>
+    <div class="action-group">
+      <button class="action-btn reject"  id="btnReject"  onclick="setReview('reject')">✕ Reject</button>
+      <button class="action-btn accept"  id="btnAccept"  onclick="setReview('accept')">✓ Accept</button>
+      <button class="action-btn pending" id="btnPending" onclick="setReview('pending')">◷ Pending</button>
+    </div>
+    <div class="action-hint">A · R · P · ←/→ 이동 · Space 재생 · T 검수프레임</div>
+    <div class="sync-state" id="syncState">서버 저장 대기 중</div>
+  </div>
+</footer>
+
+<script>
+const SEARCH_API  = "/api/search";
+const IMAGE_API   = "/api/image?path=";
+const REVIEW_API  = "/api/review";     // POST 저장
+const REVIEWS_API = "/api/reviews";    // GET 조회
+const FRAME_INTERVAL_MS = 700;
+const TARGET_TOLERANCE_S = 0.55;
+
+const TASK_SCHEMAS = {
+  AAA1: { tagKey: "aaa1_tags", envFields: ["time","da_road_type","weather"],
+    targetFields: ["contaminated_lane","invisible_lanes_city_3_5_lanes_many_vehicles_ahead","no_lane_mark_road","two_three_wheelers_carrying_loads","vehicles_carrying_loads_or_protruding_cargo","bullock_carts","hand_pulled_carts","animal_sitting_or_standing_cow","animal_large_dog","barricades","crowded_pedestrian","yellow_line_near_curb","yellow_line_low_sun","white_line_low_sun","road_boundary_low_sun","road_boundary_guardrail_or_wall","road_boundary_lane_separator","road_boundary_flat","road_boundary_parked_car"] },
+  LSD: { tagKey: "lsd_tags", envFields: [],
+    targetFields: ["low_streetlight_road","oncoming_vehicle_far_60m","oncoming_vehicle_taillight_cluster","motorbike_headlamp","reflector_guardrail","reflector_lane_divider","reflector_tunnel_lowmid_light","reflector_white_all","sign_strong_light_reflection","sign_white_heavy_reflection","camera_torn_frame"] },
+  LD_General: { tagKey: "ld_general_tags", envFields: [], targetFields: [] },
+  OD_General: { tagKey: "od_general_tags", envFields: [], targetFields: [] },
+};
+
+let state = {
+  taskName: "AAA1", queryLabel: "match_all", esQuery: { match_all: {} },
+  items: [], index: 0,
+  reviews: {},          // { uuid: {status, reviewer, updated_at} } — 서버에서 로드
+  reviewer: "",
+  recordingSpan: null, targetTime: null,
+  contextRange: null, playingEventIdx: -1,
+  usingFrameMode: false, frameSeq: [], frameIdx: 0, frameTimer: null,
+};
+
+/* ══ 진입 ══ */
+function loadHandoff() {
+  try {
+    const raw = sessionStorage.getItem("odd_review_context");
+    if (raw) {
+      const ctx = JSON.parse(raw);
+      state.taskName   = ctx.taskName   || state.taskName;
+      state.esQuery    = ctx.esQuery    || state.esQuery;
+      state.queryLabel = ctx.queryLabel || state.queryLabel;
+      if (typeof ctx.startIndex === "number") state.index = ctx.startIndex;
+      return;
+    }
+  } catch (e) {}
+  const p = new URLSearchParams(location.search);
+  if (p.get("task")) {
+    state.taskName = p.get("task");
+    state.esQuery = { bool: { must: [{ term: { taskName: state.taskName } }] } };
+    state.queryLabel = `task: ${state.taskName}`;
+  }
+}
+
+/* 검수자 이름 — 브라우저에 기억 (판정 주체 식별용) */
+function loadReviewerName() {
+  let name = "";
+  try { name = localStorage.getItem("odd_reviewer") || ""; } catch (e) {}
+  state.reviewer = name;
+  document.getElementById("reviewerInput").value = name;
+}
+function saveReviewerName() {
+  const v = document.getElementById("reviewerInput").value.trim();
+  state.reviewer = v;
+  try { localStorage.setItem("odd_reviewer", v); } catch (e) {}
+  if (v) showToast(`검수자: ${v}`);
+}
+
+async function init() {
+  loadHandoff();
+  loadReviewerName();
+  document.getElementById("hqTask").textContent = state.taskName;
+  document.getElementById("hqQuery").textContent = state.queryLabel;
+
+  await fetchResults();
+  await fetchReviews();          // ③ 서버에서 검수 결과 로드
+  renderList();
+  if (state.items.length) selectIndex(state.index);
+  updateDashboard();
+}
+
+async function fetchResults() {
+  try {
+    const res = await fetch(SEARCH_API, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(state.esQuery),
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    state.items = (data.hits || []).sort((a, b) => {
+      if (a.recording_id !== b.recording_id) return a.recording_id < b.recording_id ? -1 : 1;
+      return (a.timestamp_s || 0) - (b.timestamp_s || 0);
+    });
+  } catch (e) { showToast("검색 실패: " + e.message, true); state.items = []; }
+}
+
+/* ③ 서버에서 검수 결과 조회 (다른 사람이 한 것도 함께 보임) */
+async function fetchReviews() {
+  try {
+    const res = await fetch(`${REVIEWS_API}?task=${encodeURIComponent(state.taskName)}`);
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    state.reviews = data.reviews || {};
+    setSyncState("saved", `서버에서 ${data.total || 0}건 로드됨`);
+  } catch (e) {
+    setSyncState("error", "검수 결과 로드 실패");
+    showToast("검수 결과 로드 실패: " + e.message, true);
+  }
+}
+
+function setSyncState(kind, msg) {
+  const el = document.getElementById("syncState");
+  el.className = `sync-state ${kind}`;
+  el.textContent = msg;
+}
+
+/* ══ 리스트 ══ */
+function renderList() {
+  const el = document.getElementById("resultList");
+  document.getElementById("listCount").textContent = `${state.items.length}건`;
+  if (!state.items.length) { el.innerHTML = `<div class="state-block">검색 결과가 없습니다.</div>`; return; }
+  el.innerHTML = state.items.map((h, i) => {
+    const rv = state.reviews[h.uuid];
+    const status = rv ? rv.status : "";
+    const byOther = rv && rv.reviewer && state.reviewer && rv.reviewer !== state.reviewer;
+    const shortRec = (h.recording_id || "").replace("Rec_Drv_GER_", "");
+    return `
+      <div class="result-item ${i === state.index ? "active" : ""}" data-idx="${i}" onclick="selectIndex(${i})">
+        <img class="ri-thumb" src="${IMAGE_API}${encodeURIComponent(h.imagePath || "")}" loading="lazy" alt="">
+        <div class="ri-meta">
+          <div class="ri-title">${h.whole_second != null ? h.whole_second + "s" : "—"} · ${(h.uuid || "").slice(0,8)}</div>
+          <div class="ri-sub">${shortRec}</div>
+          ${byOther ? `<div class="ri-other">by ${rv.reviewer}</div>` : ""}
+        </div>
+        <div class="ri-status ${status}"></div>
+      </div>`;
+  }).join("");
+}
+function scrollListToActive() {
+  const item = document.querySelector(`.result-item[data-idx="${state.index}"]`);
+  if (item) item.scrollIntoView({ block: "nearest", behavior: "smooth" });
+}
+
+/* ══ 항목 선택 ══ */
+function selectIndex(i) {
+  if (i < 0 || i >= state.items.length) return;
+  state.index = i;
+  document.querySelectorAll(".result-item").forEach(el =>
+    el.classList.toggle("active", Number(el.dataset.idx) === i));
+  scrollListToActive();
+
+  const h = state.items[i];
+  const sameRec = state.items.filter(x => x.recording_id === h.recording_id);
+  const times = sameRec.map(x => x.timestamp_s).filter(v => v != null);
+  state.recordingSpan = times.length
+    ? { start: Math.min(...times) - 1, end: Math.max(...times) + 1 }
+    : { start: (h.timestamp_s || 0) - 5, end: (h.timestamp_s || 0) + 5 };
+
+  state.targetTime = h.timestamp_s;
+  state.contextRange = null;
+  state.playingEventIdx = -1;
+
+  loadMedia(h);
+  seekAbs(state.targetTime);
+  renderGantt(h);
+  renderTags(h);
+  renderTargetCard(h);
+  renderEventList(h);
+  updateNav();
+  updateActionButtons();
+  updateModeBadge();
+}
+
+function goPrev() { if (state.index > 0) selectIndex(state.index - 1); }
+function goNext() { if (state.index < state.items.length - 1) selectIndex(state.index + 1); }
+function updateNav() {
+  document.getElementById("navPos").textContent = `${state.index + 1} / ${state.items.length}`;
+  document.getElementById("prevBtn").disabled = state.index === 0;
+  document.getElementById("nextBtn").disabled = state.index >= state.items.length - 1;
+}
+
+function renderTargetCard(h) {
+  document.getElementById("targetThumb").src = IMAGE_API + encodeURIComponent(h.imagePath || "");
+  const rel = ((h.timestamp_s || 0) - state.recordingSpan.start).toFixed(1);
+  document.getElementById("targetMeta").innerHTML = `
+    <div>위치: ${rel}s (${h.whole_second}s 지점)</div>
+    <div>uuid: ${(h.uuid||"").slice(0,13)}…</div>`;
+
+  // 다른 사람이 이미 검수한 경우 알림
+  const rv = state.reviews[h.uuid];
+  const box = document.getElementById("otherReviewer");
+  if (rv && rv.reviewer && state.reviewer && rv.reviewer !== state.reviewer) {
+    const when = rv.updated_at ? new Date(rv.updated_at).toLocaleString("ko-KR") : "";
+    box.style.display = "block";
+    box.textContent = `⚠ ${rv.reviewer}님이 이미 "${rv.status}"로 판정 (${when})`;
+  } else { box.style.display = "none"; }
+}
+
+/* ══ 참고 재생 ══ */
+function playEventContext(idx) {
+  const h = state.items[state.index];
+  const events = h.motional_events || [];
+  if (idx < 0 || idx >= events.length) return;
+  const ev = events[idx];
+  state.contextRange = { start: ev.start, end: ev.end, label: ev.scenario };
+  state.playingEventIdx = idx;
+  renderEventList(h); renderGantt(h);
+  seekAbs(ev.start); updateTimeline(); updateModeBadge();
+  showToast(`참고 재생: ${ev.scenario} (${ev.duration}초)`);
+  startPlayback();
+}
+window.playEventContext = playEventContext;
+
+function renderEventList(h) {
+  const el = document.getElementById("eventList");
+  const events = h.motional_events || [];
+  if (!events.length) { el.innerHTML = `<span class="chip-empty">Motional 이벤트 없음</span>`; return; }
+  el.innerHTML = events.map((ev, i) => {
+    const relStart = (ev.start - state.recordingSpan.start).toFixed(1);
+    const relEnd   = (ev.end   - state.recordingSpan.start).toFixed(1);
+    return `
+      <div class="event-card ${i === state.playingEventIdx ? "playing" : ""} ${ev.exact ? "" : "nearby"}"
+           onclick="playEventContext(${i})">
+        <div class="ec-name">${ev.scenario}</div>
+        <div class="ec-meta">
+          <span>${relStart}s ~ ${relEnd}s · ${ev.duration}초</span>
+          <span class="ec-tag ${ev.exact ? "exact" : "nearby"}">${ev.exact ? "발생중" : "근접"}</span>
+        </div>
+      </div>`;
+  }).join("");
+}
+
+/* ══ 미디어 ══ */
+function resolveVideoUrl(hit) { return null; }   // 영상 경로 확정 시 수정
+
+function loadMedia(hit) {
+  stopFrameLoop();
+  const video = document.getElementById("player");
+  const framePlayer = document.getElementById("framePlayer");
+  const url = resolveVideoUrl(hit);
+  if (url) {
+    state.usingFrameMode = false;
+    document.getElementById("fallbackNote").style.display = "none";
+    framePlayer.style.display = "none"; video.style.display = "block";
+    video.src = url;
+    video.onloadedmetadata = () => { seekAbs(state.targetTime); updateTimeline(); };
+  } else {
+    state.usingFrameMode = true;
+    document.getElementById("fallbackNote").style.display = "block";
+    video.style.display = "none"; video.removeAttribute("src");
+    framePlayer.style.display = "block";
+    state.frameSeq = state.items.filter(x => x.recording_id === hit.recording_id)
+      .sort((a, b) => a.timestamp_s - b.timestamp_s);
+    state.frameIdx = Math.max(0, state.frameSeq.findIndex(x => x.uuid === hit.uuid));
+    showFrame(state.frameIdx);
+  }
+}
+
+function showFrame(idx) {
+  if (!state.frameSeq.length) return;
+  idx = Math.max(0, Math.min(idx, state.frameSeq.length - 1));
+  state.frameIdx = idx;
+  document.getElementById("framePlayer").src =
+    IMAGE_API + encodeURIComponent(state.frameSeq[idx].imagePath || "");
+  updateTimeline(); updateGanttPlayhead(); updateTargetHighlight();
+}
+
+function currentAbsTime() {
+  if (state.usingFrameMode) {
+    const f = state.frameSeq[state.frameIdx];
+    return f ? f.timestamp_s : (state.targetTime || 0);
+  }
+  return state.recordingSpan.start + (document.getElementById("player").currentTime || 0);
+}
+
+function seekAbs(absTime) {
+  if (state.usingFrameMode) {
+    let best = 0, bestDiff = Infinity;
+    state.frameSeq.forEach((f, i) => {
+      const d = Math.abs(f.timestamp_s - absTime);
+      if (d < bestDiff) { bestDiff = d; best = i; }
+    });
+    showFrame(best);
+  } else {
+    seekingByCode = true;
+    document.getElementById("player").currentTime = Math.max(0, absTime - state.recordingSpan.start);
+    setTimeout(() => { seekingByCode = false; }, 60);
+  }
+}
+
+function updateTargetHighlight() {
+  const stage = document.getElementById("videoStage");
+  if (state.targetTime == null) { stage.classList.remove("on-target"); return; }
+  stage.classList.toggle("on-target",
+    Math.abs(currentAbsTime() - state.targetTime) <= TARGET_TOLERANCE_S);
+}
+
+function jumpToTarget() {
+  pausePlayback();
+  state.contextRange = null; state.playingEventIdx = -1;
+  seekAbs(state.targetTime); updateTimeline();
+  renderEventList(state.items[state.index]); renderGantt(state.items[state.index]);
+  updateModeBadge();
+  showToast("검수 대상 프레임으로 이동");
+}
+window.jumpToTarget = jumpToTarget;
+
+function updateModeBadge() {
+  const b = document.getElementById("modeBadge");
+  b.textContent = state.contextRange ? `참고: ${state.contextRange.label}` : "검수 프레임 기준";
+}
+
+let playing = false;
+function togglePlay() { playing ? pausePlayback() : startPlayback(); }
+function startPlayback() {
+  playing = true;
+  document.getElementById("playBtn").textContent = "❚❚";
+  if (state.usingFrameMode) {
+    stopFrameLoop();
+    state.frameTimer = setInterval(() => {
+      const next = state.frameIdx + 1;
+      if (next >= state.frameSeq.length) { pausePlayback(); return; }
+      if (state.contextRange && state.frameSeq[next].timestamp_s > state.contextRange.end) {
+        pausePlayback(); showToast("참고 구간 끝 · ◉ 버튼으로 복귀"); return;
+      }
+      showFrame(next);
+    }, FRAME_INTERVAL_MS);
+  } else { document.getElementById("player").play(); }
+}
+function pausePlayback() {
+  playing = false;
+  document.getElementById("playBtn").textContent = "▶";
+  stopFrameLoop();
+  if (!state.usingFrameMode) document.getElementById("player").pause();
+}
+function stopFrameLoop() { if (state.frameTimer) { clearInterval(state.frameTimer); state.frameTimer = null; } }
+
+document.getElementById("player").addEventListener("timeupdate", () => {
+  if (state.usingFrameMode) return;
+  updateTimeline(); updateGanttPlayhead(); updateTargetHighlight();
+  if (state.contextRange && currentAbsTime() >= state.contextRange.end) pausePlayback();
+});
+
+/* ══ 타임라인 ══ */
+let seekingByCode = false;
+const tlWrap = document.getElementById("timelineWrap");
+
+function updateTimeline() {
+  if (!state.recordingSpan) return;
+  const span = state.recordingSpan.end - state.recordingSpan.start;
+  if (span <= 0) return;
+  const abs = currentAbsTime();
+  const pct = ((abs - state.recordingSpan.start) / span) * 100;
+  const tPct = ((state.targetTime - state.recordingSpan.start) / span) * 100;
+  document.getElementById("tlTarget").style.left = `${Math.max(0, Math.min(100, tPct))}%`;
+
+  const ctxEl = document.getElementById("tlContext");
+  if (state.contextRange) {
+    const cs = ((state.contextRange.start - state.recordingSpan.start) / span) * 100;
+    const cw = ((state.contextRange.end - state.contextRange.start) / span) * 100;
+    ctxEl.style.display = "block";
+    ctxEl.style.left = `${Math.max(0, cs)}%`;
+    ctxEl.style.width = `${Math.max(0.5, cw)}%`;
+  } else ctxEl.style.display = "none";
+
+  document.getElementById("tlPlayed").style.width = `${Math.max(0, Math.min(100, pct))}%`;
+  document.getElementById("tlHead").style.left    = `${Math.max(0, Math.min(100, pct))}%`;
+  document.getElementById("timeReadout").textContent =
+    `${(abs - state.recordingSpan.start).toFixed(1)}s / ${span.toFixed(1)}s`;
+}
+
+function timelineSeekFromEvent(e) {
+  const rect = tlWrap.getBoundingClientRect();
+  const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+  const span = state.recordingSpan.end - state.recordingSpan.start;
+  state.contextRange = null; state.playingEventIdx = -1; updateModeBadge();
+  seekAbs(state.recordingSpan.start + ratio * span);
+  updateTimeline();
+}
+let dragging = false;
+tlWrap.addEventListener("mousedown", e => { dragging = true; timelineSeekFromEvent(e); });
+window.addEventListener("mousemove", e => { if (dragging) timelineSeekFromEvent(e); });
+window.addEventListener("mouseup", () => { dragging = false; });
+
+/* ══ 간트 ══ */
+function collectRecordingEvents(hit) {
+  const seen = new Map();
+  state.items.filter(x => x.recording_id === hit.recording_id)
+    .forEach(f => (f.motional_events || []).forEach(ev => {
+      const key = `${ev.scenario}|${ev.start.toFixed(3)}|${ev.end.toFixed(3)}`;
+      if (!seen.has(key)) seen.set(key, ev);
+    }));
+  return Array.from(seen.values());
+}
+
+function renderGantt(hit) {
+  const grid = document.getElementById("ganttGrid");
+  const all = collectRecordingEvents(hit);
+  const span = state.recordingSpan.end - state.recordingSpan.start;
+  const myEvents = hit.motional_events || [];
+  const myKeys = new Set(myEvents.map(e => `${e.scenario}|${e.start.toFixed(3)}`));
+  const myScenarios = new Set(myEvents.map(e => e.scenario));
+
+  const lanes = {};
+  all.forEach(ev => { (lanes[ev.scenario] = lanes[ev.scenario] || []).push(ev); });
+  const names = Object.keys(lanes).sort((a, b) => {
+    const aa = myScenarios.has(a), bb = myScenarios.has(b);
+    if (aa !== bb) return aa ? -1 : 1;
+    return a.localeCompare(b);
+  });
+
+  document.getElementById("ganttMeta").textContent = `${names.length}개 시나리오 · ${span.toFixed(0)}초`;
+  if (!names.length) { grid.innerHTML = `<div class="state-block">Motional 이벤트가 없습니다.</div>`; return; }
+
+  const playingEv = state.playingEventIdx >= 0 ? myEvents[state.playingEventIdx] : null;
+  const rows = names.map(name => {
+    const bars = lanes[name].map(ev => {
+      const left  = ((ev.start - state.recordingSpan.start) / span) * 100;
+      const width = ((ev.end - ev.start) / span) * 100;
+      const isMine = myKeys.has(`${ev.scenario}|${ev.start.toFixed(3)}`);
+      const isPlaying = playingEv && playingEv.scenario === ev.scenario && Math.abs(playingEv.start - ev.start) < 0.001;
+      const cls = `gantt-bar${isMine ? " matched" : ""}${isPlaying ? " playing" : ""}`;
+      const myIdx = myEvents.findIndex(e => e.scenario === ev.scenario && Math.abs(e.start - ev.start) < 0.001);
+      const click = myIdx >= 0 ? `onclick="playEventContext(${myIdx})"` : "";
+      const title = `${name}\n${(ev.start - state.recordingSpan.start).toFixed(1)}s ~ ${(ev.end - state.recordingSpan.start).toFixed(1)}s`;
+      return `<div class="${cls}" style="left:${left}%; width:${Math.max(0.5,width)}%" title="${title}" ${click}></div>`;
+    }).join("");
+    return `<div class="gantt-row ${myScenarios.has(name) ? "is-active" : ""}">
+        <div class="gantt-label" title="${name}">${name}</div>
+        <div class="gantt-lane">${bars}</div>
+      </div>`;
+  }).join("");
+
+  const targetPct = ((state.targetTime - state.recordingSpan.start) / span);
+  let ctxBand = "";
+  if (state.contextRange) {
+    const cs = ((state.contextRange.start - state.recordingSpan.start) / span);
+    const cw = ((state.contextRange.end - state.contextRange.start) / span);
+    ctxBand = `<div class="gantt-context-band" style="left:calc(215px + (100% - 215px) * ${cs}); width:calc((100% - 215px) * ${cw});"></div>`;
+  }
+  const tickStep = span > 90 ? 20 : (span > 40 ? 10 : 5);
+  let ticks = "";
+  for (let t = 0; t <= span; t += tickStep) ticks += `<span class="gantt-tick" style="left:${(t/span)*100}%">${t}s</span>`;
+
+  grid.innerHTML = `
+    <div style="position:relative;">
+      ${rows}${ctxBand}
+      <div class="gantt-target-line" style="left:calc(215px + (100% - 215px) * ${targetPct});" title="검수 대상 프레임"></div>
+      <div class="gantt-playhead" id="ganttPlayhead" style="left:calc(215px + (100% - 215px) * ${targetPct});"></div>
+    </div>
+    <div class="gantt-axis"><div></div><div class="gantt-axis-ticks">${ticks}</div></div>`;
+  updateGanttPlayhead();
+}
+
+function updateGanttPlayhead() {
+  const ph = document.getElementById("ganttPlayhead");
+  if (!ph || !state.recordingSpan) return;
+  const span = state.recordingSpan.end - state.recordingSpan.start;
+  const pct = (currentAbsTime() - state.recordingSpan.start) / span;
+  ph.style.left = `calc(215px + (100% - 215px) * ${Math.max(0, Math.min(1, pct))})`;
+}
+
+/* ══ 태그 ══ */
+function renderTags(h) {
+  const schema = TASK_SCHEMAS[state.taskName] || { tagKey:"", envFields:[], targetFields:[] };
+  const t = (h.tags && h.tags[schema.tagKey]) || {};
+  const envHtml = schema.envFields.filter(k => t[k]).map(k => `<span class="chip env">${t[k]}</span>`).join("");
+  document.getElementById("envChips").innerHTML = envHtml || `<span class="chip-empty">—</span>`;
+  const present = schema.targetFields.filter(k => t[k] === "present").map(k => `<span class="chip odd">${k}</span>`).join("");
+  const unknown = schema.targetFields.filter(k => t[k] === "unknown").map(k => `<span class="chip odd unknown">${k}</span>`).join("");
+  document.getElementById("oddChips").innerHTML = (present + unknown) || `<span class="chip-empty">—</span>`;
+}
+
+/* ══ ③ 검수 판정 → 서버 저장 ══ */
+async function setReview(status) {
+  const h = state.items[state.index];
+  if (!h) return;
+
+  if (!state.reviewer) {
+    showToast("먼저 우측 상단에 검수자 이름을 입력해주세요", true);
+    document.getElementById("reviewerInput").focus();
+    return;
+  }
+
+  const cur = state.reviews[h.uuid];
+  const newStatus = (cur && cur.status === status) ? "" : status;   // 같은 버튼 → 해제
+
+  // 낙관적 갱신 (먼저 화면에 반영하고, 실패 시 되돌림)
+  const prev = state.reviews[h.uuid];
+  if (newStatus) {
+    state.reviews[h.uuid] = {
+      status: newStatus, reviewer: state.reviewer,
+      updated_at: new Date().toISOString(),
+    };
+  } else delete state.reviews[h.uuid];
+
+  updateActionButtons(); updateDashboard();
+  const dot = document.querySelector(`.result-item[data-idx="${state.index}"] .ri-status`);
+  if (dot) dot.className = `ri-status ${newStatus}`;
+
+  setSyncState("saving", "저장 중…");
+  try {
+    const res = await fetch(REVIEW_API, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        frame_uuid: h.uuid,
+        doc_id: `${(h.taskName||"").toLowerCase()}-${h.recording_id}-${h.whole_second}`,
+        taskName: h.taskName,
+        recording_id: h.recording_id,
+        whole_second: h.whole_second,
+        status: newStatus,
+        reviewer: state.reviewer,
+      }),
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    setSyncState("saved", `저장됨 · ${new Date().toLocaleTimeString("ko-KR")}`);
+  } catch (e) {
+    // 실패 시 롤백
+    if (prev) state.reviews[h.uuid] = prev; else delete state.reviews[h.uuid];
+    updateActionButtons(); updateDashboard(); renderList();
+    setSyncState("error", "저장 실패");
+    showToast("저장 실패: " + e.message, true);
+    return;
+  }
+
+  if (newStatus && state.index < state.items.length - 1) setTimeout(goNext, 220);
+}
+
+function updateActionButtons() {
+  const h = state.items[state.index];
+  const rv = h ? state.reviews[h.uuid] : null;
+  const cur = rv ? rv.status : null;
+  document.getElementById("btnAccept").classList.toggle("on", cur === "accept");
+  document.getElementById("btnReject").classList.toggle("on", cur === "reject");
+  document.getElementById("btnPending").classList.toggle("on", cur === "pending");
+}
+
+function updateDashboard() {
+  const total = state.items.length;
+  let a=0, r=0, p=0;
+  state.items.forEach(h => {
+    const rv = state.reviews[h.uuid];
+    if (!rv) return;
+    if (rv.status === "accept") a++; else if (rv.status === "reject") r++; else if (rv.status === "pending") p++;
+  });
+  const done = a + r + p;
+  document.getElementById("cntAccept").textContent = a;
+  document.getElementById("cntReject").textContent = r;
+  document.getElementById("cntPending").textContent = p;
+  document.getElementById("cntNone").textContent = total - done;
+  document.getElementById("progressText").textContent = `${done} / ${total}`;
+  const pct = v => total ? (v/total)*100 : 0;
+  document.getElementById("segAccept").style.width  = pct(a)+"%";
+  document.getElementById("segReject").style.width  = pct(r)+"%";
+  document.getElementById("segPending").style.width = pct(p)+"%";
+  const setArc = (id, value, offsetAcc) => {
+    const el = document.getElementById(id);
+    const v = pct(value);
+    el.setAttribute("stroke-dasharray", `${v} ${100-v}`);
+    el.setAttribute("stroke-dashoffset", `${25 - offsetAcc}`);
+  };
+  let acc = 0;
+  setArc("donutAccept", a, acc); acc += pct(a);
+  setArc("donutReject", r, acc); acc += pct(r);
+  setArc("donutPending", p, acc);
+  document.getElementById("donutPct").textContent = total ? Math.round((done/total)*100)+"%" : "0%";
+}
+
+/* ══ CSV ══ */
+function exportReviewCSV() {
+  if (!state.items.length) { showToast("내보낼 데이터가 없습니다", true); return; }
+  const schema = TASK_SCHEMAS[state.taskName] || { tagKey:"", envFields:[], targetFields:[] };
+  const header = ["review_status","reviewer","reviewed_at","uuid","taskName","recording_id",
+    "whole_second","timestamp_s","imagePath",
+    ...schema.envFields, ...schema.targetFields, "motional_scenarios","motional_exact","motional_events"];
+  const rows = state.items.map(h => {
+    const t = (h.tags && h.tags[schema.tagKey]) || {};
+    const rv = state.reviews[h.uuid] || {};
+    const evStr = (h.motional_events||[]).map(e =>
+      `${e.scenario}[${e.start.toFixed(2)}~${e.end.toFixed(2)}${e.exact?",exact":""}]`).join(";");
+    return [ rv.status || "none", rv.reviewer || "", rv.updated_at || "",
+      h.uuid, h.taskName, h.recording_id, h.whole_second, h.timestamp_s, h.imagePath,
+      ...schema.envFields.map(k => t[k]||""), ...schema.targetFields.map(k => t[k]||""),
+      (h.motional_scenarios||[]).join(";"), (h.motional_exact||[]).join(";"), evStr,
+    ].map(v => `"${(v ?? "").toString().replace(/"/g,'""')}"`).join(",");
+  });
+  const csv = [header.join(","), ...rows].join("\n");
+  const blob = new Blob(["\uFEFF"+csv], { type:"text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = `odd_review_${state.taskName}_${new Date().toISOString().slice(0,10)}.csv`; a.click();
+  URL.revokeObjectURL(url);
+  showToast("CSV를 내려받았습니다");
+}
+
+/* ══ 단축키 ══ */
+document.addEventListener("keydown", e => {
+  if (["INPUT","TEXTAREA"].includes(e.target.tagName)) return;
+  switch (e.key.toLowerCase()) {
+    case "a": setReview("accept"); break;
+    case "r": setReview("reject"); break;
+    case "p": setReview("pending"); break;
+    case "t": jumpToTarget(); break;
+    case "arrowleft":  goPrev(); e.preventDefault(); break;
+    case "arrowright": goNext(); e.preventDefault(); break;
+    case " ": togglePlay(); e.preventDefault(); break;
+  }
+});
+
+function showToast(msg, isError = false, ms = 2600) {
+  const c = document.getElementById("toastContainer");
+  const t = document.createElement("div");
+  t.className = "toast" + (isError ? " err" : "");
+  t.textContent = msg;
+  c.appendChild(t);
+  setTimeout(() => t.remove(), ms);
+}
+
+window.addEventListener("DOMContentLoaded", init);
+window.addEventListener("resize", () => { updateTimeline(); updateGanttPlayhead(); });
+</script>
+
+</body>
+</html>

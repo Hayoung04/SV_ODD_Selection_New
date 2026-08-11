@@ -1,0 +1,22 @@
+{
+  "uuid": "8973f049-554a-4f51-ac62-e9264ec87b69",
+  "taskName": "LSD",
+  "promptVersion": "lsd_prompt_v1.1",
+  "imagePath": "/mnt/data-center/scenes/GER/MACHET18/260422/Rec_Drv_GER_MACHET18_20260422_183426/images/2160p_h120_front/GER_MACHET18_20260422_183426_1776875716899178_2160p_h120_front.jpg",
+  "tags": {
+    "lsd_tags": {
+      "low STREETLIGHT ROAD": "absent",
+      "ONCOMING VEHICLE FAR 60M": "absent",
+      "ONCOMING VEHICLE TAILLIGHT CLUSTER": "absent",
+      "MOTORBIKE HEADLAMP": "absent",
+      "REFLECTOR GUARDRAIL": "absent",
+      "REFLECTOR LANE DIVIDER": "unknown",
+      "REFLECTOR TUNNEL LOWMID LIGHT": "absent",
+      "REFLECTOR WHITE ALL": "absent",
+      "SIGN STRONG LIGHT REFLECTION": "absent",
+      "SIGN WHITE HEAVY REFLECTION": "absent",
+      "CAMERA TORN FRAME": "absent"
+    }
+  },
+  "rawModelResponse": "{\n  \"lsd_tags\": {\n    \"low STREETLIGHT ROAD\": \"absent\",\n    \"ONCOMING VEHICLE FAR 60M\": \"absent\",\n    \"ONCOMING VEHICLE TAILLIGHT CLUSTER\": \"absent\",\n    \"MOTORBIKE HEADLAMP\": \"absent\",\n    \"REFLECTOR GUARDRAIL\": \"absent\",\n    \"REFLECTOR LANE DIVIDER\": \"unknown\",\n    \"REFLECTOR TUNNEL LOWMID LIGHT\": \"absent\",\n    \"REFLECTOR WHITE ALL\": \"absent\",\n    \"SIGN STRONG LIGHT REFLECTION\": \"absent\",\n    \"SIGN WHITE HEAVY REFLECTION\": \"absent\",\n    \"CAMERA TORN FRAME\": \"absent\"\n  }\n}"
+}

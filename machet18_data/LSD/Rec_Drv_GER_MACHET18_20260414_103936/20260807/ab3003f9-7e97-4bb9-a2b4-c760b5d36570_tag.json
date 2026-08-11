@@ -1,0 +1,8 @@
+{
+  "uuid": "ab3003f9-7e97-4bb9-a2b4-c760b5d36570",
+  "taskName": "LSD",
+  "promptVersion": "lsd_prompt_v1.1",
+  "imagePath": "/mnt/data-center/scenes/GER/MACHET18/260414/Rec_Drv_GER_MACHET18_20260414_103936/images/2160p_h120_front/GER_MACHET18_20260414_103936_1776156030499649_2160p_h120_front.jpg",
+  "tags": null,
+  "rawModelResponse": "Tokenize the LSD prompt from the following image using light-source condition analysis.\nFor each target condition below, decide if it is present or absent in this frame.\nChoose exactly ONE of: \"present\", \"absent\".\n\nInput:\nYou are a professional smart sensor event annotator. Given an image from a forward-facing vehicle camera, tag all conscious light-source conditions visible. Tag based ONLY on visible scene features. Tag all light sources and their effect.\n\nLSD targets (use \"present\" or \"absent\" only):\n- \"oncoming_vehicles\": \"present\" if the image clearly contains one or more oncoming vehicles whose headlights are visible in the ego camera's field of view.\n- \"reflector_white_all\": \"present\" if the image clearly contains at least one white reflective surface (roadside reflectors, dashboard reflectors, or highly reflective sign) that is splicin **gently bright glints** or tail lights or other **light** elements (like car headlamps) in the scene are clearly visible or identifiable.\n- \"camera_torn_frame\": \"present\" if the frame clearly shows tearing, displacement, or corruption.\n\nReturn ONLY valid JSON, no extra text."
+}

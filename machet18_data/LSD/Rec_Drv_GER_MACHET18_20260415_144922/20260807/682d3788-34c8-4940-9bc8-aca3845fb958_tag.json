@@ -1,0 +1,22 @@
+{
+  "uuid": "682d3788-34c8-4940-9bc8-aca3845fb958",
+  "taskName": "LSD",
+  "promptVersion": "lsd_prompt_v1.1",
+  "imagePath": "/mnt/data-center/scenes/GER/MACHET18/260415/Rec_Drv_GER_MACHET18_20260415_144922/images/2160p_h120_front/GER_MACHET18_20260415_144922_1776257381299222_2160p_h120_front.jpg",
+  "tags": {
+    "lsd_tags": {
+      "low_streetlight_road": "absent",
+      "oncoming_vehicle_far_60m": "absent",
+      "oncoming_vehicle_taillight_cluster": "absent",
+      "motorbike_headlamp": "absent",
+      "reflector_guardrail": "absent",
+      "reflector_lane_divider": "absent",
+      "reflector_tunnel_lowmid_light": "absent",
+      "reflector_white_all": "unknown",
+      "sign_strong_light_reflection": "absent",
+      "sign_white_heavy_reflection": "absent",
+      "camera_torn_frame": "absent"
+    }
+  },
+  "rawModelResponse": "NOTE: The prompt requires analyzing the frame assuming it is \"night driving data\". However, the image is clearly captured in daylight (full color detail, sky visible, sun glare). This creates a constraint where most \"off-road\" or \"driving in daylight\" attributes fall under \"absent\" (because the condition is not present) rather than \"unknown\" (lack of visibility), while the two \"daylight\" attributes present in the prompt logic are impossible to judge as \"present\" or \"absent\" due to the lack of evidence for a night-specific lighting environment.\n\nConsequently, `low_streetlight_road` is judged as `absent` because the scene is brightly lit (dense street lighting/sunlight), failing the requirement for a \"dark background.\" `oncoming_vehicle_far_60m` is `absent` because the stopped car is parked (not oncoming) and is at a close range, not far away. `camera_torn_frame` is `absent` as the image is physically intact.\n\nSince all similar conditions are missing, the remaining tags are evaluated against the specific definitions:\n- `oncoming_vehicle_taillight_cluster`: `absent` (No oncoming car).\n- `motorbike_headlamp`: `absent` (No motorcycle).\n- `reflector_guardrail`, `reflector_lane_divider`: The stone wall acts as a solid barrier but is not a guardrail or lane-divider with embedded reflective posts visible. These are `absent`.\n- `reflector_tunnel_lowmid_light`: `absent` (Open road, not a tunnel).\n- `reflector_white_all`: The prohibition sign has a lustre, but the definition requires a \"glint\" acting as a light source. Given the strict criteria for night driving light sources where reflectors rely on glare returns, and this is a reflective sign in sunlight where the judgment criteria for a \"glint\" remains ambiguous for the LED-optimized selection, I have coded `unknown` here to reflect the inability to definitively judge a light-source-return.\n- `sign_strong_light_reflection`: `absent` (The sign is not reflecting the headlights into a glare; it is lit by ambient sunlight).\n- `sign_white_heavy_reflection`: `absent` (The sign is red and blue; not white).\n\n```json\n{\n  \"lsd_tags\": {\n    \"low_streetlight_road\": \"absent\",\n    \"oncoming_vehicle_far_60m\": \"absent\",\n    \"oncoming_vehicle_taillight_cluster\": \"absent\",\n    \"motorbike_headlamp\": \"absent\",\n    \"reflector_guardrail\": \"absent\",\n    \"reflector_lane_divider\": \"absent\",\n    \"reflector_tunnel_lowmid_light\": \"absent\",\n    \"reflector_white_all\": \"unknown\",\n    \"sign_strong_light_reflection\": \"absent\",\n    \"sign_white_heavy_reflection\": \"absent\",\n    \"camera_torn_frame\": \"absent\"\n  }\n}\n```"
+}

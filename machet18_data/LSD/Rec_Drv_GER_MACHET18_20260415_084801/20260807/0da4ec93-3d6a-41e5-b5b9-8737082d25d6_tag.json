@@ -1,0 +1,22 @@
+{
+  "uuid": "0da4ec93-3d6a-41e5-b5b9-8737082d25d6",
+  "taskName": "LSD",
+  "promptVersion": "lsd_prompt_v1.1",
+  "imagePath": "/mnt/data-center/scenes/GER/MACHET18/260415/Rec_Drv_GER_MACHET18_20260415_084801/images/2160p_h120_front/GER_MACHET18_20260415_084801_1776235719399218_2160p_h120_front.jpg",
+  "tags": {
+    "lsd_tags": {
+      "low_streetlight_road": "unknown",
+      "oncoming_vehicle_far_60m": "absent",
+      "oncoming_vehicle_taillight_cluster": "absent",
+      "motorbike_headlamp": "absent",
+      "reflector_guardrail": "absent",
+      "reflector_lane_divider": "known",
+      "reflector_tunnel_lowmid_light": "absent",
+      "reflector_white_all": "absent",
+      "sign_strong_light_reflection": "absent",
+      "sign_white_heavy_reflection": "absent",
+      "camera_torn_frame": "absent"
+    }
+  },
+  "rawModelResponse": "```json\n{\n  \"lsd_tags\": {\n    \"low_streetlight_road\": \"unknown\",\n    \"oncoming_vehicle_far_60m\": \"absent\",\n    \"oncoming_vehicle_taillight_cluster\": \"absent\",\n    \"motorbike_headlamp\": \"absent\",\n    \"reflector_guardrail\": \"absent\",\n    \"reflector_lane_divider\": \"known\",\n    \"reflector_tunnel_lowmid_light\": \"absent\",\n    \"reflector_white_all\": \"absent\",\n    \"sign_strong_light_reflection\": \"absent\",\n    \"sign_white_heavy_reflection\": \"absent\",\n    \"camera_torn_frame\": \"absent\"\n  }\n}\n```\n\n*Correction Note*: In the `reflector_lane_divider` key, I misapplied \"know\" instead of the required \"unknown\" or \"absent\". Since the lane divider lines are clearly visible and not glowing white/bright reflectors, and no posts with reflector glints are present, the value is \"absent\". Re-korrecting for valid output values:\n\n```json\n{\n  \"lsd_tags\": {\n    \"low_streetlight_road\": \"unknown\",\n    \"oncoming_vehicle_far_60m\": \"absent\",\n    \"oncoming_vehicle_taillight_cluster\": \"absent\",\n    \"motorbike_headlamp\": \"absent\",\n    \"reflector_guardrail\": \"absent\",\n    \"reflector_lane_divider\": \"absent\",\n    \"reflector_tunnel_lowmid_light\": \"absent\",\n    \"reflector_white_all\": \"absent\",\n    \"sign_strong_light_reflection\": \"absent\",\n    \"sign_white_heavy_reflection\": \"absent\",\n    \"camera_torn_frame\": \"absent\"\n  }\n}\n```"
+}

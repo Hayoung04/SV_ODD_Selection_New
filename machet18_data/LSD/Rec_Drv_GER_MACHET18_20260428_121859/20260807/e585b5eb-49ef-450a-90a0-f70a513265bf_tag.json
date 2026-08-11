@@ -1,0 +1,22 @@
+{
+  "uuid": "e585b5eb-49ef-450a-90a0-f70a513265bf",
+  "taskName": "LSD",
+  "promptVersion": "lsd_prompt_v1.1",
+  "imagePath": "/mnt/data-center/scenes/GER/MACHET18/260428/Rec_Drv_GER_MACHET18_20260428_121859/images/2160p_h120_front/GER_MACHET18_20260428_121859_1777371553699068_2160p_h120_front.jpg",
+  "tags": {
+    "lsd_tags": {
+      "low_streetlight_road": "absent",
+      "oncoming_vehicle_far_60m": "absent",
+      "oncoming_vehicle_taillight_cluster": "absent",
+      "motorbike_headlamp": "absent",
+      "reflector_guardrail": "absent",
+      "reflector_lane_divider": "absent",
+      "reflector_tunnel_lowmid_light": "absent",
+      "reflector_white_all": "absent",
+      "sign_strong_light_reflection": "absent",
+      "sign_white_heavy_reflection": "absent",
+      "camera_torn_frame": "absent"
+    }
+  },
+  "rawModelResponse": "Based on the analysis of the provided image, here are the LSD tag evaluations.\n\n**Analysis Summary:**\n- **Daytime Setting:** The most critical observation is that this is a **daytime** scene (blue sky, clear sunlit trees). Unlike night-time images where darkness highlights discrete light sources, this scene is evenly lit by natural sunlight.\n- **Light Source Visibility:** The headlights and taillights of the distant vehicles are either not illuminated or are blended into the road surface brightness due to the ambient daylight, making them indistinguishable as specific \"LSD light sources\" in the way they would be under night conditions.\n- **Reflectors/Signs:**\n    - `reflector_lane_divider`: The posts are visible, but they are small white vertical posts marked on the grass/road edge. They are brightly lit by daylight but do not function as reflective light sources reflecting the ego vehicle's headlights because there are no headlights shining in the scene.\n    - `reflector_guardrail`: The guardrail is visible but not illuminated by a vehicle's headlights reflecting off it.\n- **Integrity:** The image appears physically correct with no signs of sensor tearing, noise, or corruption.\n\n**JSON Output:**\n\n```json\n{\n  \"lsd_tags\": {\n    \"low_streetlight_road\": \"absent\",\n    \"oncoming_vehicle_far_60m\": \"absent\",\n    \"oncoming_vehicle_taillight_cluster\": \"absent\",\n    \"motorbike_headlamp\": \"absent\",\n    \"reflector_guardrail\": \"absent\",\n    \"reflector_lane_divider\": \"absent\",\n    \"reflector_tunnel_lowmid_light\": \"absent\",\n    \"reflector_white_all\": \"absent\",\n    \"sign_strong_light_reflection\": \"absent\",\n    \"sign_white_heavy_reflection\": \"absent\",\n    \"camera_torn_frame\": \"absent\"\n  }\n}\n```"
+}

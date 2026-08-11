@@ -1,0 +1,33 @@
+{
+  "uuid": "ce4027ab-5e63-4863-a37a-e028f44fbe6f",
+  "taskName": "AAA1",
+  "promptVersion": "aaa1_prompt_v1",
+  "imagePath": "/mnt/data-center/scenes/GER/MACHET18/260422/Rec_Drv_GER_MACHET18_20260422_183426/images/2160p_h120_front/GER_MACHET18_20260422_183426_1776875669799079_2160p_h120_front.jpg",
+  "tags": {
+    "aaa1_tags": {
+      "contaminated_lane": "absent",
+      "invisible_lanes_city_3_5_lanes_many_vehicles_ahead": "absent",
+      "no_lane_mark_road": "absent",
+      "two_three_wheelers_carrying_loads": "unknown",
+      "vehicles_carrying_loads_or_protruding_cargo": "absent",
+      "bullock_carts": "absent",
+      "hand_pulled_carts": "unknown",
+      "animal_sitting_or_standing_cow": "absent",
+      "animal_large_dog": "unknown",
+      "barricades": "unknown",
+      "crowded_pedestrian": "absent",
+      "yellow_line_near_curb": "unknown",
+      "yellow_line_low_sun": "unknown",
+      "white_line_low_sun": "unknown",
+      "road_boundary_low_sun": "absent",
+      "road_boundary_guardrail_or_wall": "absent",
+      "road_boundary_lane_separator": "unknown",
+      "road_boundary_flat": "absent",
+      "road_boundary_parked_car": "unknown",
+      "time": "day",
+      "da_road_type": "parking_lot_outdoor",
+      "weather": "clear"
+    }
+  },
+  "rawModelResponse": "{\n  \"aaa1_tags\": {\n    \"contaminated_lane\": \"absent\",\n    \"invisible_lanes_city_3_5_lanes_many_vehicles_ahead\": \"absent\",\n    \"no_lane_mark_road\": \"absent\",\n    \"two_three_wheelers_carrying_loads\": \"unknown\",\n    \"vehicles_carrying_loads_or_protruding_cargo\": \"absent\",\n    \"bullock_carts\": \"absent\",\n    \"hand_pulled_carts\": \"unknown\",\n    \"animal_sitting_or_standing_cow\": \"absent\",\n    \"animal_large_dog\": \"unknown\",\n    \"barricades\": \"unknown\",\n    \"crowded_pedestrian\": \"absent\",\n    \"yellow_line_near_curb\": \"unknown\",\n    \"yellow_line_low_sun\": \"unknown\",\n    \"white_line_low_sun\": \"unknown\",\n    \"road_boundary_low_sun\": \"absent\",\n    \"road_boundary_guardrail_or_wall\": \"absent\",\n    \"road_boundary_lane_separator\": \"unknown\",\n    \"road_boundary_flat\": \"absent\",\n    \"road_boundary_parked_car\": \"unknown\",\n    \"time\": \"day\",\n    \"da_road_type\": \"parking_lot_outdoor\",\n    \"weather\": \"clear\"\n  }\n}"
+}

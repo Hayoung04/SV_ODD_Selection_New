@@ -1,0 +1,22 @@
+{
+  "uuid": "4a39727a-32e3-4dc2-9b54-4d9a6819d888",
+  "taskName": "LSD",
+  "promptVersion": "lsd_prompt_v1.1",
+  "imagePath": "/mnt/data-center/scenes/GER/MACHET18/260415/Rec_Drv_GER_MACHET18_20260415_084801/images/2160p_h120_front/GER_MACHET18_20260415_084801_1776235737799022_2160p_h120_front.jpg",
+  "tags": {
+    "lsd_tags": {
+      "low_streetlight_road": "absent",
+      "oncoming_vehicle_far_60m": "absent",
+      "oncoming_vehicle_taillight_cluster": "absent",
+      "motorbike_headlamp": "absent",
+      "reflector_guardrail": "absent",
+      "reflector_lane_divider": "absent",
+      "reflector_tunnel_lowmid_light": "absent",
+      "reflector_white_all": "absent",
+      "sign_strong_light_reflection": "absent",
+      "sign_white_heavy_reflection": "absent",
+      "camera_torn_frame": "absent"
+    }
+  },
+  "rawModelResponse": "Based on the provided image, specifically the **LSD prompt v1.1** for night driving analysis:\n\n**Critical Observation:**\nThe provided image is **Daytime**, not Nighttime. The sky is blue/blown out, buildings are fully illuminated by sunlight, shadows are distinct, and there is no darkness.\n\n*   **LSD Tag Rules:** The instructions state, \"All input is night scenes. Judge only the light sources...\" and every tag relies on night-time conditions (dark background, streetlights, etc.). Since the scene is lit during the day, none of the night-specific light sources (oncoming headlights, taillights, reflector glints) exist in this frame.\n*   **Scene Classification:** The frame is a brightly and continuously lit road (dense urban/roadside lighting by daylight) where discrete light sources do not stand out against a dark background. Therefore, `low_streetlight_road` is `absent`.\n*   **Integrity:** The frame is apparently intact (no tearing/blurring), although it is not a night scene. Thus, `camera_torn_frame` is `absent`.\n*   **Light Sources:** Since it is day, `oncoming_vehicle_far_60m`, `oncoming_vehicle_taillight_cluster`, `motorbike_headlamp`, and tunnel lights are all `absent` as the necessary conditions (darkness/night lights) are missing.\n\n```json\n{\n  \"lsd_tags\": {\n    \"low_streetlight_road\": \"absent\",\n    \"oncoming_vehicle_far_60m\": \"absent\",\n    \"oncoming_vehicle_taillight_cluster\": \"absent\",\n    \"motorbike_headlamp\": \"absent\",\n    \"reflector_guardrail\": \"absent\",\n    \"reflector_lane_divider\": \"absent\",\n    \"reflector_tunnel_lowmid_light\": \"absent\",\n    \"reflector_white_all\": \"absent\",\n    \"sign_strong_light_reflection\": \"absent\",\n    \"sign_white_heavy_reflection\": \"absent\",\n    \"camera_torn_frame\": \"absent\"\n  }\n}\n```"
+}

@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "taskName": "LSD",
+  "runId": "20260807",
+  "status": "completed",
+  "createdAt": "2026-08-07T04:53:34.180487+00:00",
+  "updatedAt": "2026-08-07T04:54:25.482289+00:00",
+  "input": {
+    "inputDataPath": "/mnt/data-center/scenes/GER/MACHET18/260422/Rec_Drv_GER_MACHET18_20260422_085926/images/2160p_h120_front"
+  },
+  "output": {
+    "outputPrefix": "outputs/MACHET18_10clips/LSD/Rec_Drv_GER_MACHET18_20260422_085926/20260807"
+  },
+  "stages": [
+    {
+      "name": "discover",
+      "status": "ok",
+      "startedAt": "2026-08-07T04:53:34.180523+00:00",
+      "finishedAt": "2026-08-07T04:53:35.479327+00:00",
+      "elapsedSec": 1.299,
+      "counts": {
+        "images": 599
+      }
+    },
+    {
+      "name": "serverWait",
+      "status": "ok",
+      "startedAt": "2026-08-07T04:53:35.479639+00:00",
+      "finishedAt": "2026-08-07T04:53:35.483342+00:00",
+      "elapsedSec": 0.004,
+      "counts": {}
+    },
+    {
+      "name": "tagging",
+      "status": "ok",
+      "startedAt": "2026-08-07T04:53:35.939385+00:00",
+      "finishedAt": "2026-08-07T04:54:25.481359+00:00",
+      "elapsedSec": 49.542,
+      "counts": {
+        "totalItems": 599,
+        "tagged": 599,
+        "failed": 0
+      }
+    }
+  ]
+}

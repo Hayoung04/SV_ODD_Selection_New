@@ -1,0 +1,22 @@
+{
+  "uuid": "be311e2e-021d-4177-99a7-24f46393f42f",
+  "taskName": "LSD",
+  "promptVersion": "lsd_prompt_v1.1",
+  "imagePath": "/mnt/data-center/scenes/GER/MACHET18/260428/Rec_Drv_GER_MACHET18_20260428_121859/images/2160p_h120_front/GER_MACHET18_20260428_121859_1777371590799462_2160p_h120_front.jpg",
+  "tags": {
+    "lsd_tags": {
+      "low_streetlight_road": "absent",
+      "oncoming_vehicle_far_60m": "untakeable",
+      "oncoming_vehicle_taillight_cluster": "unknown",
+      "motorbike_headlamp": "forced_present",
+      "reflector_guardrail": "unknown",
+      "reflector_lane_divider": "unknown",
+      "reflector_tunnel_lowmid_light": "unknown",
+      "reflector_white_all": "unknown",
+      "sign_strong_light_reflection": "unknown",
+      "sign_white_heavy_reflection": "unknown",
+      "camera_torn_frame": "absent"
+    }
+  },
+  "rawModelResponse": "```json\n{\n  \"lsd_tags\": {\n    \"low_streetlight_road\": \"absent\",\n    \"oncoming_vehicle_far_60m\": \"untakeable\",\n    \"oncoming_vehicle_taillight_cluster\": \"unknown\",\n    \"motorbike_headlamp\": \"forced_present\",\n    \"reflector_guardrail\": \"unknown\",\n    \"reflector_lane_divider\": \"unknown\",\n    \"reflector_tunnel_lowmid_light\": \"unknown\",\n    \"reflector_white_all\": \"unknown\",\n    \"sign_strong_light_reflection\": \"unknown\",\n    \"sign_white_heavy_reflection\": \"unknown\",\n    \"camera_torn_frame\": \"absent\"\n  }\n}\n```\n\n*Note: The input image is clearly captured during the day with blue skies and visible shadows. However, the system instructions strictly enforce that all input is night-time data and require tagging night-specific light-source conditions based on a fixed schema. No high lumens, low glare, low contrast, or fog scattering tags (which are required for L3/L4 tagging) were selected to remain consistent with the provided list of allowed values despite the visual contradiction.*"
+}

@@ -1,0 +1,33 @@
+{
+  "uuid": "5d7968b6-d810-40c6-927d-a84f12cc58b6",
+  "taskName": "AAA1",
+  "promptVersion": "aaa1_prompt_v1",
+  "imagePath": "/mnt/data-center/scenes/GER/MACHET18/260428/Rec_Drv_GER_MACHET18_20260428_121859/images/2160p_h120_front/GER_MACHET18_20260428_121859_1777371540399024_2160p_h120_front.jpg",
+  "tags": {
+    "aaa1_tags": {
+      "contaminated_lane": "absent",
+      "invisible_lanes_city_3_5_lanes_many_vehicles_ahead": "absent",
+      "no_lane_mark_road": "absent",
+      "two_three_wheelers_carrying_loads": "absent",
+      "vehicles_carrying_loads_or_protruding_cargo": "absent",
+      "bullock_carts": "absent",
+      "hand_pulled_carts": "absent",
+      "animal_sitting_or_standing_cow": "absent",
+      "animal_large_dog": "absent",
+      "barricades": "absent",
+      "crowded_pedestrian": "absent",
+      "yellow_line_near_curb": "absent",
+      "yellow_line_low_sun": "absent",
+      "white_line_low_sun": "absent",
+      "road_boundary_low_sun": "absent",
+      "road_boundary_guardrail_or_wall": "present",
+      "road_boundary_lane_separator": "absent",
+      "road_boundary_flat": "absent",
+      "road_boundary_parked_car": "absent",
+      "time": "day",
+      "da_road_type": "public_road_highway",
+      "weather": "clear"
+    }
+  },
+  "rawModelResponse": "{\"aaa1_tags\": {\"contaminated_lane\": \"absent\", \"invisible_lanes_city_3_5_lanes_many_vehicles_ahead\": \"absent\", \"no_lane_mark_road\": \"absent\", \"two_three_wheelers_carrying_loads\": \"absent\", \"vehicles_carrying_loads_or_protruding_cargo\": \"absent\", \"bullock_carts\": \"absent\", \"hand_pulled_carts\": \"absent\", \"animal_sitting_or_standing_cow\": \"absent\", \"animal_large_dog\": \"absent\", \"barricades\": \"absent\", \"crowded_pedestrian\": \"absent\", \"yellow_line_near_curb\": \"absent\", \"yellow_line_low_sun\": \"absent\", \"white_line_low_sun\": \"absent\", \"road_boundary_low_sun\": \"absent\", \"road_boundary_guardrail_or_wall\": \"present\", \"road_boundary_lane_separator\": \"absent\", \"road_boundary_flat\": \"absent\", \"road_boundary_parked_car\": \"absent\", \"time\": \"day\", \"da_road_type\": \"public_road_highway\", \"weather\": \"clear\"}}"
+}

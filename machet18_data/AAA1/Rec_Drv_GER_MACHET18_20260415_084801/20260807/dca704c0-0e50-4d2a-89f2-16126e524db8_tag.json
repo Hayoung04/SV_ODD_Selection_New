@@ -1,0 +1,33 @@
+{
+  "uuid": "dca704c0-0e50-4d2a-89f2-16126e524db8",
+  "taskName": "AAA1",
+  "promptVersion": "aaa1_prompt_v1",
+  "imagePath": "/mnt/data-center/scenes/GER/MACHET18/260415/Rec_Drv_GER_MACHET18_20260415_084801/images/2160p_h120_front/GER_MACHET18_20260415_084801_1776235681798879_2160p_h120_front.jpg",
+  "tags": {
+    "aaa1_tags": {
+      "contaminatedLane": "absent",
+      "invisibleLanesCity3_5LanesManyVehiclesAhead": "absent",
+      "noLaneMarkRoad": "absent",
+      "two3WheelersCarryingLoads": "absent",
+      "vehiclesCarryingLoadsOrProtrudingCargo": "absent",
+      "bullockCarts": "absent",
+      "handPulledCarts": "absent",
+      "animalSittingOrStandingCow": "absent",
+      "animalLargeDog": "absent",
+      "barricades": "absent",
+      "crowdedPedestrian": "absent",
+      "yellowLineNearCurb": "absent",
+      "yellowLineLowSun": "absent",
+      "whiteLineLowSun": "absent",
+      "roadBoundaryLowSun": "present",
+      "roadBoundaryGuardrailOrWall": "absent",
+      "roadBoundaryLaneSeparator": "absent",
+      "roadBoundaryFlat": "absent",
+      "roadBoundaryParkedCar": "absent",
+      "time": "day",
+      "daRoadType": "public_road_city",
+      "weather": "clear"
+    }
+  },
+  "rawModelResponse": "{\n  \"aaa1_tags\": {\n    \"contaminatedLane\": \"absent\",\n    \"invisibleLanesCity3_5LanesManyVehiclesAhead\": \"absent\",\n    \"noLaneMarkRoad\": \"absent\",\n    \"two3WheelersCarryingLoads\": \"absent\",\n    \"vehiclesCarryingLoadsOrProtrudingCargo\": \"absent\",\n    \"bullockCarts\": \"absent\",\n    \"handPulledCarts\": \"absent\",\n    \"animalSittingOrStandingCow\": \"absent\",\n    \"animalLargeDog\": \"absent\",\n    \"barricades\": \"absent\",\n    \"crowdedPedestrian\": \"absent\",\n    \"yellowLineNearCurb\": \"absent\",\n    \"yellowLineLowSun\": \"absent\",\n    \"whiteLineLowSun\": \"absent\",\n    \"roadBoundaryLowSun\": \"present\",\n    \"roadBoundaryGuardrailOrWall\": \"absent\",\n    \"roadBoundaryLaneSeparator\": \"absent\",\n    \"roadBoundaryFlat\": \"absent\",\n    \"roadBoundaryParkedCar\": \"absent\",\n    \"time\": \"day\",\n    \"daRoadType\": \"public_road_city\",\n    \"weather\": \"clear\"\n  }\n}"
+}

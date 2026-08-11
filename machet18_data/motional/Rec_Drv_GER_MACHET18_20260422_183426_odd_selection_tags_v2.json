@@ -1,0 +1,938 @@
+{
+  "uuid": "e932b78d-841c-5df8-b518-520daf29be88",
+  "taskName": "MS_ODD_RULE_BASED_SELECTION",
+  "promptVersion": "rule_based_odd_selection_v2",
+  "imagePath": "/media/stradvision/25eb199d-ae8a-49d6-b7e9-675eb144ddcd/ms-odd-tagging-data/data/01_raw/Rec_Drv_GER_MACHET18_20260422_183426",
+  "tags": {
+    "odd_selection_tags": {
+      "stationary": "present",
+      "low_magnitude_speed": "present",
+      "medium_magnitude_speed": "present",
+      "high_magnitude_speed": "present",
+      "high_lateral_acceleration": "present",
+      "starting_left_turn": "absent",
+      "starting_right_turn": "present",
+      "starting_low_speed_turn": "present",
+      "starting_high_speed_turn": "absent",
+      "changing_lane": "absent",
+      "changing_lane_to_left": "absent",
+      "changing_lane_to_right": "absent",
+      "traversing_crosswalk": "absent",
+      "on_stopline_crosswalk": "absent",
+      "stationary_at_crosswalk": "present",
+      "stopping_at_crosswalk": "absent",
+      "accelerating_at_crosswalk": "absent",
+      "near_high_speed_vehicle": "present",
+      "near_long_vehicle": "present",
+      "near_multiple_bikes": "absent",
+      "near_multiple_motorcycle": "absent",
+      "near_multiple_pedestrians": "absent",
+      "near_multiple_vehicles": "present",
+      "near_pedestrian_on_crosswalk": "absent",
+      "near_pedestrian_on_crosswalk_with_ego": "absent",
+      "crossed_by_bike": "absent",
+      "crossed_by_motorcycle": "absent",
+      "crossed_by_vehicle": "present",
+      "following_lane_with_slow_lead": "absent",
+      "changing_lane_with_lead": "absent",
+      "changing_lane_with_trail": "absent",
+      "stopping_with_lead": "absent",
+      "stopping_without_lead": "absent",
+      "stationary_in_traffic": "absent",
+      "behind_bike": "absent",
+      "behind_long_vehicle": "absent",
+      "behind_pedestrian_on_driveable": "absent",
+      "waiting_for_pedestrian_to_cross": "absent",
+      "near_barrier_on_driveable": "absent"
+    },
+    "odd_selection_scenario_events": {
+      "stationary": [
+        {
+          "scenario": "stationary",
+          "start_frame": 577,
+          "end_frame": 597,
+          "start_timestamp_s": 1776875723.7992666,
+          "end_timestamp_s": 1776875725.7991152,
+          "duration_s": 1.999849,
+          "confidence": 1.0,
+          "source": "rule_based",
+          "detector_version": "phase1-v1",
+          "evidence": {
+            "start_speed_mps": 0.4094,
+            "end_speed_mps": 0.0822,
+            "minimum_speed_mps": 0.0254,
+            "maximum_speed_mps": 0.4094,
+            "classification_mode": "exclusive_per_frame_speed",
+            "band_minimum_mps": 0.0,
+            "band_maximum_mps": 0.5,
+            "maximum_inclusive": false,
+            "interval_boundary_convention": "inclusive_samples",
+            "threshold_provenance": "taxonomy_defined"
+          }
+        }
+      ],
+      "low_magnitude_speed": [
+        {
+          "scenario": "low_magnitude_speed",
+          "start_frame": 0,
+          "end_frame": 209,
+          "start_timestamp_s": 1776875666.0991898,
+          "end_timestamp_s": 1776875686.9989364,
+          "duration_s": 20.899747,
+          "confidence": 1.0,
+          "source": "rule_based",
+          "detector_version": "phase1-v1",
+          "evidence": {
+            "start_speed_mps": 2.3388,
+            "end_speed_mps": 4.6962,
+            "minimum_speed_mps": 1.2765,
+            "maximum_speed_mps": 4.709,
+            "classification_mode": "exclusive_per_frame_speed",
+            "band_minimum_mps": 0.5,
+            "band_maximum_mps": 5.0,
+            "maximum_inclusive": false,
+            "interval_boundary_convention": "inclusive_samples",
+            "threshold_provenance": "taxonomy_defined"
+          }
+        },
+        {
+          "scenario": "low_magnitude_speed",
+          "start_frame": 360,
+          "end_frame": 360,
+          "start_timestamp_s": 1776875702.0990324,
+          "end_timestamp_s": 1776875702.0990324,
+          "duration_s": 0.0,
+          "confidence": 1.0,
+          "source": "rule_based",
+          "detector_version": "phase1-v1",
+          "evidence": {
+            "start_speed_mps": 4.3065,
+            "end_speed_mps": 4.3065,
+            "minimum_speed_mps": 4.3065,
+            "maximum_speed_mps": 4.3065,
+            "classification_mode": "exclusive_per_frame_speed",
+            "band_minimum_mps": 0.5,
+            "band_maximum_mps": 5.0,
+            "maximum_inclusive": false,
+            "interval_boundary_convention": "inclusive_samples",
+            "threshold_provenance": "taxonomy_defined"
+          }
+        },
+        {
+          "scenario": "low_magnitude_speed",
+          "start_frame": 370,
+          "end_frame": 370,
+          "start_timestamp_s": 1776875703.099114,
+          "end_timestamp_s": 1776875703.099114,
+          "duration_s": 0.0,
+          "confidence": 1.0,
+          "source": "rule_based",
+          "detector_version": "phase1-v1",
+          "evidence": {
+            "start_speed_mps": 4.3205,
+            "end_speed_mps": 4.3205,
+            "minimum_speed_mps": 4.3205,
+            "maximum_speed_mps": 4.3205,
+            "classification_mode": "exclusive_per_frame_speed",
+            "band_minimum_mps": 0.5,
+            "band_maximum_mps": 5.0,
+            "maximum_inclusive": false,
+            "interval_boundary_convention": "inclusive_samples",
+            "threshold_provenance": "taxonomy_defined"
+          }
+        },
+        {
+          "scenario": "low_magnitude_speed",
+          "start_frame": 527,
+          "end_frame": 576,
+          "start_timestamp_s": 1776875718.799344,
+          "end_timestamp_s": 1776875723.6992733,
+          "duration_s": 4.899929,
+          "confidence": 1.0,
+          "source": "rule_based",
+          "detector_version": "phase1-v1",
+          "evidence": {
+            "start_speed_mps": 4.9524,
+            "end_speed_mps": 0.5956,
+            "minimum_speed_mps": 0.5956,
+            "maximum_speed_mps": 4.9524,
+            "classification_mode": "exclusive_per_frame_speed",
+            "band_minimum_mps": 0.5,
+            "band_maximum_mps": 5.0,
+            "maximum_inclusive": false,
+            "interval_boundary_convention": "inclusive_samples",
+            "threshold_provenance": "taxonomy_defined"
+          }
+        }
+      ],
+      "medium_magnitude_speed": [
+        {
+          "scenario": "medium_magnitude_speed",
+          "start_frame": 210,
+          "end_frame": 359,
+          "start_timestamp_s": 1776875687.099277,
+          "end_timestamp_s": 1776875701.9990678,
+          "duration_s": 14.899791,
+          "confidence": 1.0,
+          "source": "rule_based",
+          "detector_version": "phase1-v1",
+          "evidence": {
+            "start_speed_mps": 5.0098,
+            "end_speed_mps": 11.9308,
+            "minimum_speed_mps": 5.0098,
+            "maximum_speed_mps": 11.9308,
+            "classification_mode": "exclusive_per_frame_speed",
+            "band_minimum_mps": 5.0,
+            "band_maximum_mps": 15.0,
+            "maximum_inclusive": false,
+            "interval_boundary_convention": "inclusive_samples",
+            "threshold_provenance": "taxonomy_defined"
+          }
+        },
+        {
+          "scenario": "medium_magnitude_speed",
+          "start_frame": 361,
+          "end_frame": 369,
+          "start_timestamp_s": 1776875702.1990168,
+          "end_timestamp_s": 1776875702.9991155,
+          "duration_s": 0.800099,
+          "confidence": 1.0,
+          "source": "rule_based",
+          "detector_version": "phase1-v1",
+          "evidence": {
+            "start_speed_mps": 7.9811,
+            "end_speed_mps": 12.2539,
+            "minimum_speed_mps": 7.9466,
+            "maximum_speed_mps": 12.2539,
+            "classification_mode": "exclusive_per_frame_speed",
+            "band_minimum_mps": 5.0,
+            "band_maximum_mps": 15.0,
+            "maximum_inclusive": false,
+            "interval_boundary_convention": "inclusive_samples",
+            "threshold_provenance": "taxonomy_defined"
+          }
+        },
+        {
+          "scenario": "medium_magnitude_speed",
+          "start_frame": 371,
+          "end_frame": 446,
+          "start_timestamp_s": 1776875703.1991065,
+          "end_timestamp_s": 1776875710.6992755,
+          "duration_s": 7.500169,
+          "confidence": 1.0,
+          "source": "rule_based",
+          "detector_version": "phase1-v1",
+          "evidence": {
+            "start_speed_mps": 8.0651,
+            "end_speed_mps": 10.34,
+            "minimum_speed_mps": 8.0651,
+            "maximum_speed_mps": 10.34,
+            "classification_mode": "exclusive_per_frame_speed",
+            "band_minimum_mps": 5.0,
+            "band_maximum_mps": 15.0,
+            "maximum_inclusive": false,
+            "interval_boundary_convention": "inclusive_samples",
+            "threshold_provenance": "taxonomy_defined"
+          }
+        },
+        {
+          "scenario": "medium_magnitude_speed",
+          "start_frame": 448,
+          "end_frame": 456,
+          "start_timestamp_s": 1776875710.8992434,
+          "end_timestamp_s": 1776875711.6989994,
+          "duration_s": 0.799756,
+          "confidence": 1.0,
+          "source": "rule_based",
+          "detector_version": "phase1-v1",
+          "evidence": {
+            "start_speed_mps": 5.2775,
+            "end_speed_mps": 10.3393,
+            "minimum_speed_mps": 5.2775,
+            "maximum_speed_mps": 10.4694,
+            "classification_mode": "exclusive_per_frame_speed",
+            "band_minimum_mps": 5.0,
+            "band_maximum_mps": 15.0,
+            "maximum_inclusive": false,
+            "interval_boundary_convention": "inclusive_samples",
+            "threshold_provenance": "taxonomy_defined"
+          }
+        },
+        {
+          "scenario": "medium_magnitude_speed",
+          "start_frame": 458,
+          "end_frame": 526,
+          "start_timestamp_s": 1776875711.898973,
+          "end_timestamp_s": 1776875718.699352,
+          "duration_s": 6.800379,
+          "confidence": 1.0,
+          "source": "rule_based",
+          "detector_version": "phase1-v1",
+          "evidence": {
+            "start_speed_mps": 5.4669,
+            "end_speed_mps": 5.2938,
+            "minimum_speed_mps": 5.1687,
+            "maximum_speed_mps": 10.6055,
+            "classification_mode": "exclusive_per_frame_speed",
+            "band_minimum_mps": 5.0,
+            "band_maximum_mps": 15.0,
+            "maximum_inclusive": false,
+            "interval_boundary_convention": "inclusive_samples",
+            "threshold_provenance": "taxonomy_defined"
+          }
+        }
+      ],
+      "high_magnitude_speed": [
+        {
+          "scenario": "high_magnitude_speed",
+          "start_frame": 447,
+          "end_frame": 447,
+          "start_timestamp_s": 1776875710.7992623,
+          "end_timestamp_s": 1776875710.7992623,
+          "duration_s": 0.0,
+          "confidence": 1.0,
+          "source": "rule_based",
+          "detector_version": "phase1-v1",
+          "evidence": {
+            "start_speed_mps": 15.0529,
+            "end_speed_mps": 15.0529,
+            "minimum_speed_mps": 15.0529,
+            "maximum_speed_mps": 15.0529,
+            "classification_mode": "exclusive_per_frame_speed",
+            "band_minimum_mps": 15.0,
+            "band_maximum_mps": null,
+            "maximum_inclusive": true,
+            "interval_boundary_convention": "inclusive_samples",
+            "threshold_provenance": "taxonomy_defined"
+          }
+        },
+        {
+          "scenario": "high_magnitude_speed",
+          "start_frame": 457,
+          "end_frame": 457,
+          "start_timestamp_s": 1776875711.7989845,
+          "end_timestamp_s": 1776875711.7989845,
+          "duration_s": 0.0,
+          "confidence": 1.0,
+          "source": "rule_based",
+          "detector_version": "phase1-v1",
+          "evidence": {
+            "start_speed_mps": 15.1292,
+            "end_speed_mps": 15.1292,
+            "minimum_speed_mps": 15.1292,
+            "maximum_speed_mps": 15.1292,
+            "classification_mode": "exclusive_per_frame_speed",
+            "band_minimum_mps": 15.0,
+            "band_maximum_mps": null,
+            "maximum_inclusive": true,
+            "interval_boundary_convention": "inclusive_samples",
+            "threshold_provenance": "taxonomy_defined"
+          }
+        }
+      ],
+      "high_lateral_acceleration": [
+        {
+          "scenario": "high_lateral_acceleration",
+          "start_frame": 32,
+          "end_frame": 35,
+          "start_timestamp_s": 1776875669.298948,
+          "end_timestamp_s": 1776875669.5991073,
+          "duration_s": 0.300159,
+          "confidence": 1.0,
+          "source": "rule_based",
+          "detector_version": "phase1-v1",
+          "evidence": {
+            "peak_abs_lateral_acceleration_mps2": 3.3355504617482445,
+            "peak_signed_lateral_acceleration_mps2": -3.3355504617482445,
+            "representative_abs_lateral_acceleration_mps2": 2.8054659231894146,
+            "peak_frame": 34,
+            "entry_threshold_abs_mps2": 2.5,
+            "exit_threshold_abs_mps2": 2.0,
+            "threshold_provenance": "engineering_default"
+          }
+        },
+        {
+          "scenario": "high_lateral_acceleration",
+          "start_frame": 152,
+          "end_frame": 155,
+          "start_timestamp_s": 1776875681.2991335,
+          "end_timestamp_s": 1776875681.5991254,
+          "duration_s": 0.299992,
+          "confidence": 1.0,
+          "source": "rule_based",
+          "detector_version": "phase1-v1",
+          "evidence": {
+            "peak_abs_lateral_acceleration_mps2": 3.1075340494304315,
+            "peak_signed_lateral_acceleration_mps2": 3.1075340494304315,
+            "representative_abs_lateral_acceleration_mps2": 3.0337764279951953,
+            "peak_frame": 154,
+            "entry_threshold_abs_mps2": 2.5,
+            "exit_threshold_abs_mps2": 2.0,
+            "threshold_provenance": "engineering_default"
+          }
+        },
+        {
+          "scenario": "high_lateral_acceleration",
+          "start_frame": 171,
+          "end_frame": 187,
+          "start_timestamp_s": 1776875683.1996548,
+          "end_timestamp_s": 1776875684.7987895,
+          "duration_s": 1.599135,
+          "confidence": 1.0,
+          "source": "rule_based",
+          "detector_version": "phase1-v1",
+          "evidence": {
+            "peak_abs_lateral_acceleration_mps2": 13.24061174308215,
+            "peak_signed_lateral_acceleration_mps2": -13.24061174308215,
+            "representative_abs_lateral_acceleration_mps2": 5.508883444184571,
+            "peak_frame": 185,
+            "entry_threshold_abs_mps2": 2.5,
+            "exit_threshold_abs_mps2": 2.0,
+            "threshold_provenance": "engineering_default"
+          }
+        },
+        {
+          "scenario": "high_lateral_acceleration",
+          "start_frame": 362,
+          "end_frame": 367,
+          "start_timestamp_s": 1776875702.2991405,
+          "end_timestamp_s": 1776875702.7992904,
+          "duration_s": 0.50015,
+          "confidence": 1.0,
+          "source": "rule_based",
+          "detector_version": "phase1-v1",
+          "evidence": {
+            "peak_abs_lateral_acceleration_mps2": 6.159682330387813,
+            "peak_signed_lateral_acceleration_mps2": -6.159682330387813,
+            "representative_abs_lateral_acceleration_mps2": 3.9673422638167803,
+            "peak_frame": 366,
+            "entry_threshold_abs_mps2": 2.5,
+            "exit_threshold_abs_mps2": 2.0,
+            "threshold_provenance": "engineering_default"
+          }
+        }
+      ],
+      "starting_left_turn": [],
+      "starting_right_turn": [
+        {
+          "scenario": "starting_right_turn",
+          "start_frame": 149,
+          "end_frame": 206,
+          "start_timestamp_s": 1776875680.999321,
+          "end_timestamp_s": 1776875686.698433,
+          "duration_s": 5.699112,
+          "confidence": 1.0,
+          "source": "rule_based",
+          "detector_version": "phase1-v1",
+          "evidence": {
+            "physical_turn_event_id": "turn-0001",
+            "trigger_start_frame": 151,
+            "trigger_end_frame": 205,
+            "trigger_speed_mps": 2.3461,
+            "turn_speed_classification_mode": "trigger_frame_speed",
+            "signed_heading_delta_rad": -1.4652999999999998,
+            "accumulated_yaw_change_deg": -83.95550572051951,
+            "peak_signed_yaw_rate_rad_s": -0.4377,
+            "direction_sign_convention": "positive_heading_change_is_left",
+            "entry_abs_yaw_rate_rad_s": 0.08,
+            "exit_abs_yaw_rate_rad_s": 0.04,
+            "minimum_accumulated_heading_change_rad": 0.3,
+            "base_minimum_accumulated_heading_change_rad": 0.3,
+            "same_logical_lane_minimum_accumulated_heading_change_rad": 1.0471975512,
+            "logical_lane_context_complete": false,
+            "same_logical_lane": false,
+            "logical_lane_ids": [
+              "route_lane_0031"
+            ],
+            "topology_class": [],
+            "topology_confidence": 0.0,
+            "intersection_active": false,
+            "turn_candidate": "starting_right_turn",
+            "threshold_mode": "base_or_lane_change",
+            "final_decision_reason": "turn_confirmed_from_ego_yaw_and_heading_change",
+            "threshold_provenance": "provisional"
+          }
+        }
+      ],
+      "starting_low_speed_turn": [
+        {
+          "scenario": "starting_low_speed_turn",
+          "start_frame": 149,
+          "end_frame": 206,
+          "start_timestamp_s": 1776875680.999321,
+          "end_timestamp_s": 1776875686.698433,
+          "duration_s": 5.699112,
+          "confidence": 1.0,
+          "source": "rule_based",
+          "detector_version": "phase1-v1",
+          "evidence": {
+            "physical_turn_event_id": "turn-0001",
+            "trigger_start_frame": 151,
+            "trigger_end_frame": 205,
+            "trigger_speed_mps": 2.3461,
+            "turn_speed_classification_mode": "trigger_frame_speed",
+            "signed_heading_delta_rad": -1.4652999999999998,
+            "accumulated_yaw_change_deg": -83.95550572051951,
+            "peak_signed_yaw_rate_rad_s": -0.4377,
+            "direction_sign_convention": "positive_heading_change_is_left",
+            "entry_abs_yaw_rate_rad_s": 0.08,
+            "exit_abs_yaw_rate_rad_s": 0.04,
+            "minimum_accumulated_heading_change_rad": 0.3,
+            "base_minimum_accumulated_heading_change_rad": 0.3,
+            "same_logical_lane_minimum_accumulated_heading_change_rad": 1.0471975512,
+            "logical_lane_context_complete": false,
+            "same_logical_lane": false,
+            "logical_lane_ids": [
+              "route_lane_0031"
+            ],
+            "topology_class": [],
+            "topology_confidence": 0.0,
+            "intersection_active": false,
+            "turn_candidate": "starting_right_turn",
+            "threshold_mode": "base_or_lane_change",
+            "final_decision_reason": "turn_confirmed_from_ego_yaw_and_heading_change",
+            "threshold_provenance": "provisional",
+            "turn_speed_cutoff_mps": 5.0,
+            "turn_speed_threshold_provenance": "provisional"
+          }
+        }
+      ],
+      "starting_high_speed_turn": [],
+      "changing_lane": [],
+      "changing_lane_to_left": [],
+      "changing_lane_to_right": [],
+      "traversing_crosswalk": [],
+      "on_stopline_crosswalk": [],
+      "stationary_at_crosswalk": [
+        {
+          "scenario": "stationary_at_crosswalk",
+          "start_frame": 577,
+          "end_frame": 597,
+          "start_timestamp_s": 1776875723.7992666,
+          "end_timestamp_s": 1776875725.7991152,
+          "duration_s": 1.999849,
+          "confidence": 1.0,
+          "source": "rule_based",
+          "detector_version": "phase2b-crosswalk-v1",
+          "evidence": {
+            "road_feature_event_id": "crosswalk-stationary:crosswalk:1047:577",
+            "crosswalk_id": "crosswalk:1047",
+            "stationary_relation": "before",
+            "distance_m": 1.893,
+            "stationary_maximum_mps": 0.5,
+            "interval_boundary_convention": "inclusive_observed_frames",
+            "threshold_provenance": "provisional"
+          }
+        }
+      ],
+      "stopping_at_crosswalk": [],
+      "accelerating_at_crosswalk": [],
+      "near_high_speed_vehicle": [
+        {
+          "scenario": "near_high_speed_vehicle",
+          "start_frame": 523,
+          "end_frame": 531,
+          "start_timestamp_s": 1776875718.3990457,
+          "end_timestamp_s": 1776875719.1993237,
+          "duration_s": 0.800278,
+          "confidence": 1.0,
+          "source": "rule_based",
+          "detector_version": "phase3a-object-relations-v1",
+          "evidence": {
+            "object_interaction_event_id": "high-speed:object:174:523",
+            "object_track_ids": [
+              "object:174"
+            ],
+            "source_object_ids": [
+              "174"
+            ],
+            "object_classes": [
+              "car"
+            ],
+            "minimum_footprint_distance_m": 26.349,
+            "peak_object_speed_mps": 22.4938,
+            "representative_object_speed_mps": 18.3068,
+            "speed_definition": "absolute_ground_relative_lcs",
+            "velocity_sources": [
+              "derived_global"
+            ],
+            "representative_signed_longitudinal_m": 31.663,
+            "representative_signed_lateral_m": 6.382,
+            "entry_threshold_mps": 15.0,
+            "release_threshold_mps": 13.0,
+            "interval_boundary_convention": "inclusive_observed_frames",
+            "threshold_provenance": "provisional"
+          }
+        },
+        {
+          "scenario": "near_high_speed_vehicle",
+          "start_frame": 530,
+          "end_frame": 553,
+          "start_timestamp_s": 1776875719.0993237,
+          "end_timestamp_s": 1776875721.399324,
+          "duration_s": 2.3,
+          "confidence": 1.0,
+          "source": "rule_based",
+          "detector_version": "phase3a-object-relations-v1",
+          "evidence": {
+            "object_interaction_event_id": "high-speed:object:177:530",
+            "object_track_ids": [
+              "object:177"
+            ],
+            "source_object_ids": [
+              "177"
+            ],
+            "object_classes": [
+              "car"
+            ],
+            "minimum_footprint_distance_m": 20.549,
+            "peak_object_speed_mps": 19.8422,
+            "representative_object_speed_mps": 18.8807,
+            "speed_definition": "absolute_ground_relative_lcs",
+            "velocity_sources": [
+              "derived_global"
+            ],
+            "representative_signed_longitudinal_m": 26.103,
+            "representative_signed_lateral_m": 21.994,
+            "entry_threshold_mps": 15.0,
+            "release_threshold_mps": 13.0,
+            "interval_boundary_convention": "inclusive_observed_frames",
+            "threshold_provenance": "provisional"
+          }
+        }
+      ],
+      "near_long_vehicle": [
+        {
+          "scenario": "near_long_vehicle",
+          "start_frame": 3,
+          "end_frame": 94,
+          "start_timestamp_s": 1776875666.3989737,
+          "end_timestamp_s": 1776875675.4991608,
+          "duration_s": 9.100187,
+          "confidence": 1.0,
+          "source": "rule_based",
+          "detector_version": "phase3a-object-relations-v1",
+          "evidence": {
+            "object_interaction_event_id": "long-vehicle:object:8:3",
+            "object_track_ids": [
+              "object:8"
+            ],
+            "source_object_ids": [
+              "8"
+            ],
+            "object_class": "truck",
+            "bbox_dimensions_m": {
+              "length": 9.5529,
+              "width": 2.8314,
+              "height": 3.3477
+            },
+            "classification_reason": "explicit_class_and_minimum_length",
+            "minimum_footprint_distance_m": 9.327,
+            "interval_boundary_convention": "inclusive_observed_frames",
+            "threshold_provenance": "provisional"
+          }
+        },
+        {
+          "scenario": "near_long_vehicle",
+          "start_frame": 4,
+          "end_frame": 92,
+          "start_timestamp_s": 1776875666.4989626,
+          "end_timestamp_s": 1776875675.2991793,
+          "duration_s": 8.800217,
+          "confidence": 1.0,
+          "source": "rule_based",
+          "detector_version": "phase3a-object-relations-v1",
+          "evidence": {
+            "object_interaction_event_id": "long-vehicle:object:30:4",
+            "object_track_ids": [
+              "object:30"
+            ],
+            "source_object_ids": [
+              "30"
+            ],
+            "object_class": "truck",
+            "bbox_dimensions_m": {
+              "length": 7.4532,
+              "width": 2.9428,
+              "height": 3.0975
+            },
+            "classification_reason": "explicit_class_and_minimum_length",
+            "minimum_footprint_distance_m": 10.476,
+            "interval_boundary_convention": "inclusive_observed_frames",
+            "threshold_provenance": "provisional"
+          }
+        },
+        {
+          "scenario": "near_long_vehicle",
+          "start_frame": 16,
+          "end_frame": 210,
+          "start_timestamp_s": 1776875667.6991055,
+          "end_timestamp_s": 1776875687.099277,
+          "duration_s": 19.400172,
+          "confidence": 1.0,
+          "source": "rule_based",
+          "detector_version": "phase3a-object-relations-v1",
+          "evidence": {
+            "object_interaction_event_id": "long-vehicle:object:35:16",
+            "object_track_ids": [
+              "object:35"
+            ],
+            "source_object_ids": [
+              "35"
+            ],
+            "object_class": "truck",
+            "bbox_dimensions_m": {
+              "length": 9.4449,
+              "width": 2.9649,
+              "height": 3.4975
+            },
+            "classification_reason": "explicit_class_and_minimum_length",
+            "minimum_footprint_distance_m": 11.238,
+            "interval_boundary_convention": "inclusive_observed_frames",
+            "threshold_provenance": "provisional"
+          }
+        },
+        {
+          "scenario": "near_long_vehicle",
+          "start_frame": 29,
+          "end_frame": 172,
+          "start_timestamp_s": 1776875668.9991586,
+          "end_timestamp_s": 1776875683.2994587,
+          "duration_s": 14.3003,
+          "confidence": 1.0,
+          "source": "rule_based",
+          "detector_version": "phase3a-object-relations-v1",
+          "evidence": {
+            "object_interaction_event_id": "long-vehicle:object:14:29",
+            "object_track_ids": [
+              "object:14"
+            ],
+            "source_object_ids": [
+              "14"
+            ],
+            "object_class": "truck",
+            "bbox_dimensions_m": {
+              "length": 6.4119,
+              "width": 2.283,
+              "height": 2.5799
+            },
+            "classification_reason": "explicit_class_and_minimum_length",
+            "minimum_footprint_distance_m": 23.943,
+            "interval_boundary_convention": "inclusive_observed_frames",
+            "threshold_provenance": "provisional"
+          }
+        },
+        {
+          "scenario": "near_long_vehicle",
+          "start_frame": 322,
+          "end_frame": 366,
+          "start_timestamp_s": 1776875698.299094,
+          "end_timestamp_s": 1776875702.6991653,
+          "duration_s": 4.400071,
+          "confidence": 1.0,
+          "source": "rule_based",
+          "detector_version": "phase3a-object-relations-v1",
+          "evidence": {
+            "object_interaction_event_id": "long-vehicle:object:73:322",
+            "object_track_ids": [
+              "object:73"
+            ],
+            "source_object_ids": [
+              "73"
+            ],
+            "object_class": "truck",
+            "bbox_dimensions_m": {
+              "length": 7.8488,
+              "width": 2.8034,
+              "height": 2.4834
+            },
+            "classification_reason": "explicit_class_and_minimum_length",
+            "minimum_footprint_distance_m": 12.84,
+            "interval_boundary_convention": "inclusive_observed_frames",
+            "threshold_provenance": "provisional"
+          }
+        }
+      ],
+      "near_multiple_bikes": [],
+      "near_multiple_motorcycle": [],
+      "near_multiple_pedestrians": [],
+      "near_multiple_vehicles": [
+        {
+          "scenario": "near_multiple_vehicles",
+          "start_frame": 3,
+          "end_frame": 210,
+          "start_timestamp_s": 1776875666.3989737,
+          "end_timestamp_s": 1776875687.099277,
+          "duration_s": 20.700303,
+          "confidence": 1.0,
+          "source": "rule_based",
+          "detector_version": "phase3a-object-relations-v1",
+          "evidence": {
+            "object_interaction_event_id": "near_multiple_vehicles:object-interaction:3:object:1-object:14-object:2-object:3-object:30-object:35-object:4-object:45-object:8-object:9",
+            "object_track_ids": [
+              "object:1",
+              "object:14",
+              "object:2",
+              "object:3",
+              "object:30",
+              "object:35",
+              "object:4",
+              "object:45",
+              "object:8",
+              "object:9"
+            ],
+            "source_object_ids": [
+              "1",
+              "14",
+              "2",
+              "3",
+              "30",
+              "35",
+              "4",
+              "45",
+              "8",
+              "9"
+            ],
+            "representative_frame": 16,
+            "minimum_footprint_distance_m": 3.571,
+            "normalized_category": "vehicle",
+            "minimum_required_count": 2,
+            "peak_simultaneous_count": 8,
+            "vehicle_category_definition": "configured_motorized_road_vehicles_excluding_bicycle_and_motorcycle",
+            "interval_boundary_convention": "inclusive_observed_frames",
+            "threshold_provenance": "provisional"
+          }
+        },
+        {
+          "scenario": "near_multiple_vehicles",
+          "start_frame": 377,
+          "end_frame": 445,
+          "start_timestamp_s": 1776875703.7990592,
+          "end_timestamp_s": 1776875710.5992885,
+          "duration_s": 6.800229,
+          "confidence": 1.0,
+          "source": "rule_based",
+          "detector_version": "phase3a-object-relations-v1",
+          "evidence": {
+            "object_interaction_event_id": "near_multiple_vehicles:object-interaction:377:object:104-object:106-object:114-object:122-object:145-object:157-object:77-object:77:2-object:77:3-object:86-object:86:2-object:92",
+            "object_track_ids": [
+              "object:104",
+              "object:106",
+              "object:114",
+              "object:122",
+              "object:145",
+              "object:157",
+              "object:77",
+              "object:77:2",
+              "object:77:3",
+              "object:86",
+              "object:86:2",
+              "object:92"
+            ],
+            "source_object_ids": [
+              "104",
+              "106",
+              "114",
+              "122",
+              "145",
+              "157",
+              "77",
+              "80",
+              "84",
+              "86",
+              "88",
+              "92"
+            ],
+            "representative_frame": 409,
+            "minimum_footprint_distance_m": 21.379,
+            "normalized_category": "vehicle",
+            "minimum_required_count": 2,
+            "peak_simultaneous_count": 12,
+            "vehicle_category_definition": "configured_motorized_road_vehicles_excluding_bicycle_and_motorcycle",
+            "interval_boundary_convention": "inclusive_observed_frames",
+            "threshold_provenance": "provisional"
+          }
+        }
+      ],
+      "near_pedestrian_on_crosswalk": [],
+      "near_pedestrian_on_crosswalk_with_ego": [],
+      "crossed_by_bike": [],
+      "crossed_by_motorcycle": [],
+      "crossed_by_vehicle": [
+        {
+          "scenario": "crossed_by_vehicle",
+          "start_frame": 524,
+          "end_frame": 553,
+          "start_timestamp_s": 1776875718.4992156,
+          "end_timestamp_s": 1776875721.399324,
+          "duration_s": 2.900108,
+          "confidence": 1.0,
+          "source": "rule_based",
+          "detector_version": "phase3c-forward-arc-crossing-v3",
+          "evidence": {
+            "object_path_crossing_event_id": "path-crossing:object:177:535",
+            "object_track_id": "object:177",
+            "object_track_ids": [
+              "object:177"
+            ],
+            "source_object_ids": [
+              "177"
+            ],
+            "original_class": "car",
+            "normalized_category": "vehicle",
+            "crossing_direction": "left_to_right",
+            "initial_side": "LEFT",
+            "final_side": "RIGHT",
+            "arc_entry_frame": 535,
+            "arc_exit_frame": 551,
+            "source_side_confirmation_frame": 525,
+            "approach_start_frame": 525,
+            "target_side_confirmation_frame": 553,
+            "minimum_path_distance_m": 0.3841,
+            "lateral_displacement_m": 52.2277,
+            "ground_displacement_m": 53.4313,
+            "representative_speed_mps": 18.8864,
+            "representative_path_normal_speed_mps": 18.7134,
+            "arc_dwell_duration_s": 1.6001,
+            "directional_motion_fraction": 1.0,
+            "projected_intersection_confirmations": 25,
+            "projected_intersection_lcs_m": [
+              125.3485,
+              -282.5315
+            ],
+            "intersection_path_progress_m": 25.0669,
+            "crossing_angle_deg": 82.044,
+            "object_heading_lcs_rad": -3.2431,
+            "heading_motion_difference_deg": 0.697,
+            "ego_time_to_intersection_s": 0.9999,
+            "object_time_to_intersection_s": 0.9999,
+            "time_to_intersection_difference_s": 0.0,
+            "velocity_sources": [
+              "derived_global"
+            ],
+            "interval_convention": "inclusive observed start/end frames",
+            "forward_arc": {
+              "inner_radius_m": 2.0,
+              "outer_radius_m": 30.0,
+              "half_angle_deg": 30.0,
+              "stationary_supported": true,
+              "future_pose_synchronized": true
+            },
+            "threshold_provenance": "provisional"
+          }
+        }
+      ],
+      "following_lane_with_slow_lead": [],
+      "changing_lane_with_lead": [],
+      "changing_lane_with_trail": [],
+      "stopping_with_lead": [],
+      "stopping_without_lead": [],
+      "stationary_in_traffic": [],
+      "behind_bike": [],
+      "behind_long_vehicle": [],
+      "behind_pedestrian_on_driveable": [],
+      "waiting_for_pedestrian_to_cross": [],
+      "near_barrier_on_driveable": []
+    }
+  }
+}
