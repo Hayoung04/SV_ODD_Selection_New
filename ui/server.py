@@ -283,7 +283,7 @@ if __name__ == "__main__":
 
     if not ES_USER or not ES_PASS:
         print("✗ Elasticsearch 인증 정보가 없습니다.")
-        print("  ~/odd-search/ui/.env 파일을 만들고 아래 두 줄을 넣어주세요:")
+        print("  /home/odd-selection/ui/.env 파일을 만들고 아래 두 줄을 넣어주세요:")
         print("     ES_USER=elastic")
         print("     ES_PASS=<비밀번호>")
         print("  (또는 실행 시 ES_USER=... ES_PASS=... python3 server.py)")

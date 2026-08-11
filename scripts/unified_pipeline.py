@@ -4,7 +4,7 @@ import time
 import requests
 
 # ── 경로 설정 ──
-DATA_ROOT = os.path.expanduser("~/odd-search/machet18_data")
+DATA_ROOT = "/home/odd-selection/machet18_data"
 ODD_TASK_NAMES = ["AAA1", "LSD"]
 MOTIONAL_ROOT = os.path.join(DATA_ROOT, "motional")
 
