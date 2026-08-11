@@ -10,3 +10,7 @@ es-data/
 *.key
 kafka/secrets/
 es-data/
+.aws/
+kafka/venv/
+__pycache__/
+*.pyc

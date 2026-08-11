@@ -3,6 +3,21 @@ import os
 import time
 import requests
 
+def load_dotenv(path):
+    if not os.path.exists(path):
+        return
+    with open(path, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, _, value = line.partition("=")
+            key, value = key.strip(), value.strip()
+            if key and key not in os.environ:
+                os.environ[key] = value
+
+load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"))
+
 # ── 경로 설정 ──
 DATA_ROOT = "/home/odd-selection/machet18_data"
 ODD_TASK_NAMES = ["AAA1", "LSD"]
@@ -10,8 +25,11 @@ MOTIONAL_ROOT = os.path.join(DATA_ROOT, "motional")
 
 ES_URL = "http://localhost:9200"
 ES_INDEX = "odd-frames-v2"
-ES_AUTH = ("elastic", "sv_odd_selection_2026")
+ES_AUTH = (os.environ.get("ES_USER"), os.environ.get("ES_PASS"))
 
+if not ES_AUTH[0] or not ES_AUTH[1]:
+    print("✗ .env에 ES_USER, ES_PASS가 필요합니다.")
+    exit(1)
 POLL_INTERVAL = 5
 WINDOW_HALF_S = 0.5     
 BULK_SIZE = 500
