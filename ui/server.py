@@ -105,7 +105,6 @@ def ensure_review_index():
                 "recording_id": {"type": "keyword"},
                 "whole_second": {"type": "long"},
                 "status":       {"type": "keyword"},   # accept | reject | pending
-                "reviewer":     {"type": "keyword"},
                 "note":         {"type": "text"},
                 "updated_at":   {"type": "date"},
             }
@@ -181,7 +180,6 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                     s = h["_source"]
                     reviews[s["frame_uuid"]] = {
                         "status": s.get("status"),
-                        "reviewer": s.get("reviewer"),
                         "updated_at": s.get("updated_at"),
                     }
                 self._send_json({"reviews": reviews, "total": len(reviews)})
@@ -244,7 +242,6 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                     "recording_id": body.get("recording_id"),
                     "whole_second": body.get("whole_second"),
                     "status": status,
-                    "reviewer": body.get("reviewer") or "unknown",
                     "note": body.get("note", ""),
                     "updated_at": datetime.now(timezone.utc).isoformat(),
                 }
@@ -264,7 +261,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         super().log_message(fmt, *args)
 
 
-socketserver.TCPServer.allow_reuse_address = True
+socketserver.ThreadingTCPServer.allow_reuse_address = True
 
 if __name__ == "__main__":
     base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -291,7 +288,7 @@ if __name__ == "__main__":
 
     ensure_review_index()
 
-    with socketserver.TCPServer(("", PORT), Handler) as httpd:
+    with socketserver.ThreadingTCPServer(("", PORT), Handler) as httpd:
         print(f"ODD 검색/검수 UI 서버 시작: http://localhost:{PORT}")
         print(f"  -> 프레임 인덱스 : {ES_INDEX} @ {ES_URL}")
         print(f"  -> 검수 인덱스   : {REVIEW_INDEX}")

@@ -35,12 +35,6 @@
   .hq-val { color: var(--accent-ink); font-weight: 600; }
   .hq-sep { color: var(--ink-faint); }
 
-  /* 검수자 입력 */
-  .reviewer-box { display: flex; align-items: center; gap: 7px; background: var(--bg); border: 1px solid var(--line); border-radius: 999px; padding: 5px 8px 5px 13px; }
-  .reviewer-box label { font-size: 11px; color: var(--ink-faint); font-weight: 600; }
-  .reviewer-box input { border: none; background: white; border-radius: 999px; padding: 5px 11px; font-family: var(--font-mono); font-size: 11.5px; width: 108px; outline: none; border: 1px solid var(--line); }
-  .reviewer-box input:focus { border-color: var(--accent); }
-
   .btn { font-family: var(--font); font-weight: 600; font-size: 13px; border-radius: var(--radius-sm); border: none; padding: 9px 15px; cursor: pointer; transition: opacity 0.12s, transform 0.05s; }
   .btn:active { transform: translateY(1px); }
   .btn-ghost { background: white; color: var(--ink-soft); border: 1px solid var(--line); }
@@ -70,7 +64,6 @@
   .ri-status.accept { background: var(--green); }
   .ri-status.reject { background: var(--red); }
   .ri-status.pending { background: var(--amber); }
-  .ri-other { font-size: 8.5px; color: var(--ink-faint); font-family: var(--font-mono); }
 
   .center-stack { display: flex; flex-direction: column; gap: 16px; min-height: 0; }
   .video-panel { flex-shrink: 0; }
@@ -100,7 +93,7 @@
   .timeline-context { position: absolute; height: 6px; background: rgba(128,133,160,0.28); border-radius: 999px; }
   .timeline-played { position: absolute; height: 6px; background: #b9bdd0; border-radius: 999px; }
   .timeline-target { position: absolute; width: 3px; height: 20px; background: var(--accent); border-radius: 2px; transform: translateX(-50%); pointer-events: none; box-shadow: 0 0 7px rgba(115,0,240,0.7); }
-  .timeline-target::after { content: "검수"; position: absolute; top: -15px; left: 50%; transform: translateX(-50%); font-size: 8.5px; font-weight: 800; color: var(--accent-ink); background: var(--accent-wash); padding: 1px 4px; border-radius: 3px; white-space: nowrap; }
+  .timeline-target.active { background: var(--accent-2); box-shadow: 0 0 10px rgba(147,51,245,0.9); }
   .timeline-head { position: absolute; width: 12px; height: 12px; border-radius: 50%; background: white; border: 2.5px solid var(--ink-soft); transform: translateX(-50%); box-shadow: 0 1px 4px rgba(0,0,0,0.2); pointer-events: none; }
   .time-readout { font-family: var(--font-mono); font-size: 11.5px; color: var(--ink-soft); white-space: nowrap; }
 
@@ -118,6 +111,7 @@
   .gantt-bar.playing { background: var(--accent); box-shadow: 0 0 0 2px rgba(115,0,240,0.35); }
   .gantt-context-band { position: absolute; top: 0; bottom: 22px; background: rgba(128,133,160,0.09); border-left: 1px dashed rgba(128,133,160,0.5); border-right: 1px dashed rgba(128,133,160,0.5); pointer-events: none; z-index: 2; }
   .gantt-target-line { position: absolute; top: 0; bottom: 22px; width: 2.5px; background: var(--accent); pointer-events: none; z-index: 4; box-shadow: 0 0 8px rgba(115,0,240,0.6); }
+  .gantt-target-line.active { background: var(--accent-2); box-shadow: 0 0 14px rgba(147,51,245,0.9); }
   .gantt-playhead { position: absolute; top: 0; bottom: 22px; width: 1.5px; background: rgba(128,133,160,0.8); pointer-events: none; z-index: 3; }
   .gantt-axis { display: grid; grid-template-columns: 215px 1fr; border-top: 1px solid var(--line); margin-top: 4px; padding-top: 5px; }
   .gantt-axis-ticks { position: relative; height: 16px; }
@@ -127,7 +121,6 @@
   .target-card-title { font-size: 10.5px; font-weight: 800; color: var(--accent-ink); letter-spacing: 0.04em; margin-bottom: 8px; }
   .target-thumb { width: 100%; border-radius: var(--radius-sm); background: #12141c; display: block; margin-bottom: 8px; }
   .target-meta { font-family: var(--font-mono); font-size: 10.5px; color: var(--accent-ink); line-height: 1.7; }
-  .other-reviewer { margin-top: 7px; padding: 6px 8px; background: rgba(255,255,255,0.75); border-radius: 6px; font-size: 10px; color: var(--ink-soft); font-family: var(--font-mono); }
 
   .tag-section { padding: 14px 16px; border-bottom: 1px solid var(--line); }
   .tag-section:last-child { border-bottom: none; }
@@ -196,11 +189,32 @@
   .toast { background: var(--ink); color: white; padding: 11px 16px; border-radius: var(--radius-md); box-shadow: 0 8px 26px rgba(20,20,50,0.28); font-size: 12.5px; font-weight: 500; animation: toastIn 0.25s cubic-bezier(0.16,1,0.3,1); }
   .toast.err { background: var(--red); }
   @keyframes toastIn { from { opacity:0; transform: translateX(30px);} to {opacity:1; transform:none;} }
+
+  .modal-backdrop { position: fixed; inset: 0; background: rgba(20,20,40,0.55); backdrop-filter: blur(2px); display: none; align-items: center; justify-content: center; z-index: 10000; padding: 20px; }
+  .modal-box { background: var(--panel); border-radius: var(--radius-lg); box-shadow: var(--shadow); max-width: 440px; width: 100%; padding: 26px; border: 1.5px solid rgba(115,0,240,0.25); }
+  .modal-title { font-size: 15.5px; font-weight: 800; color: var(--accent-ink); margin-bottom: 13px; display: flex; align-items: center; gap: 7px; }
+  .modal-body { font-size: 13px; line-height: 1.8; color: var(--ink-soft); margin-bottom: 20px; }
+  .modal-body b { color: var(--ink); }
+  .modal-body .accept-word { color: var(--green); font-weight: 700; }
+  .modal-body .reject-word { color: var(--red); font-weight: 700; }
+  .modal-confirm { width: 100%; text-align: center; font-size: 14px; padding: 11px; }
 </style>
 </head>
 <body>
 
 <div id="toastContainer"></div>
+
+<div class="modal-backdrop" id="introModal">
+  <div class="modal-box">
+    <div class="modal-title">◉ 검수 방식 안내</div>
+    <div class="modal-body">
+      이 화면은 기본적으로 모든 프레임이 <span class="accept-word">정상(Accept)</span>이라고 간주합니다.<br><br>
+      영상을 보다가 태그가 잘못된 것 같은 프레임에서만 <span class="reject-word">Reject 버튼(또는 R키)</span>을 눌러주세요.<br><br>
+      아무 것도 누르지 않고 지나가면 자동으로 <span class="accept-word">Accept</span> 처리됩니다.
+    </div>
+    <button class="btn btn-primary modal-confirm" onclick="dismissIntro()">확인</button>
+  </div>
+</div>
 
 <header class="header">
   <div class="logo">
@@ -217,11 +231,8 @@
     <span class="hq-label">Query</span>
     <span class="hq-val" id="hqQuery">—</span>
   </div>
-  <div class="reviewer-box">
-    <label for="reviewerInput">검수자</label>
-    <input id="reviewerInput" placeholder="이름" onchange="saveReviewerName()">
-  </div>
   <button class="btn btn-ghost" onclick="location.href='/index.html'">← 검색으로</button>
+  <button class="btn btn-ghost" onclick="showIntro()">? 안내 다시 보기</button>
   <button class="btn btn-primary" onclick="exportReviewCSV()">↓ Export CSV</button>
 </header>
 
@@ -251,7 +262,7 @@
           <div class="timeline-track"></div>
           <div class="timeline-context" id="tlContext"></div>
           <div class="timeline-played" id="tlPlayed"></div>
-          <div class="timeline-target" id="tlTarget"></div>
+          <div class="timeline-targets" id="tlTargets"></div>
           <div class="timeline-head" id="tlHead"></div>
         </div>
         <span class="time-readout" id="timeReadout">0.0s / 0.0s</span>
@@ -280,7 +291,6 @@
         <div class="target-card-title">◉ 지금 검수할 프레임</div>
         <img class="target-thumb" id="targetThumb" alt="검수 대상">
         <div class="target-meta" id="targetMeta"></div>
-        <div class="other-reviewer" id="otherReviewer" style="display:none;"></div>
       </div>
       <div class="tag-section">
         <div class="tag-section-title">촬영 조건</div>
@@ -325,7 +335,7 @@
   </div>
 
   <div class="progress-block">
-    <div class="progress-head"><span>검수 진행률 (전체 검수자 합산)</span><span id="progressText">0 / 0</span></div>
+    <div class="progress-head"><span>검수 진행률</span><span id="progressText">0 / 0</span></div>
     <div class="progress-bar">
       <div class="progress-seg accept"  id="segAccept"  style="width:0%"></div>
       <div class="progress-seg reject"  id="segReject"  style="width:0%"></div>
@@ -339,7 +349,7 @@
       <button class="action-btn accept"  id="btnAccept"  onclick="setReview('accept')">✓ Accept</button>
       <button class="action-btn pending" id="btnPending" onclick="setReview('pending')">◷ Pending</button>
     </div>
-    <div class="action-hint">A · R · P · ←/→ 이동 · Space 재생 · T 검수프레임</div>
+    <div class="action-hint">기본 Accept · 예외만 Reject · A · R · P · ←/→ 이동 · Space 재생 · T 검수프레임</div>
     <div class="sync-state" id="syncState">서버 저장 대기 중</div>
   </div>
 </footer>
@@ -351,6 +361,8 @@ const REVIEW_API  = "/api/review";     // POST 저장
 const REVIEWS_API = "/api/reviews";    // GET 조회
 const FRAME_INTERVAL_MS = 700;
 const TARGET_TOLERANCE_S = 0.55;
+const PLAYBACK_LEAD_S = 2;              // 검수 대상 프레임 -2초 지점부터 재생 시작
+const INTRO_SEEN_KEY = "odd_review_intro_seen_v1";
 
 const TASK_SCHEMAS = {
   AAA1: { tagKey: "aaa1_tags", envFields: ["time","da_road_type","weather"],
@@ -364,12 +376,14 @@ const TASK_SCHEMAS = {
 let state = {
   taskName: "AAA1", queryLabel: "match_all", esQuery: { match_all: {} },
   items: [], index: 0,
-  reviews: {},          // { uuid: {status, reviewer, updated_at} } — 서버에서 로드
-  reviewer: "",
+  reviews: {},          // { uuid: {status, updated_at} } — 서버에서 로드
   recordingSpan: null, targetTime: null,
   contextRange: null, playingEventIdx: -1,
   usingFrameMode: false, frameSeq: [], frameIdx: 0, frameTimer: null,
+  recordingFrames: [], recordingFramesKey: null,  // 현재 레코딩 전체 프레임 (재생용)
+  targetFrames: [], activeTargetUuid: null,        // 이번 레코딩 안의 검수 대상들 + 현재 하이라이트 중인 것
 };
+let autoAcceptPending = null;   // 하이라이트 진입 시 세팅, 수동 판정 시 해제 → 남아있으면 이탈 시 자동 accept
 
 /* ══ 진입 ══ */
 function loadHandoff() {
@@ -392,31 +406,17 @@ function loadHandoff() {
   }
 }
 
-/* 검수자 이름 — 브라우저에 기억 (판정 주체 식별용) */
-function loadReviewerName() {
-  let name = "";
-  try { name = localStorage.getItem("odd_reviewer") || ""; } catch (e) {}
-  state.reviewer = name;
-  document.getElementById("reviewerInput").value = name;
-}
-function saveReviewerName() {
-  const v = document.getElementById("reviewerInput").value.trim();
-  state.reviewer = v;
-  try { localStorage.setItem("odd_reviewer", v); } catch (e) {}
-  if (v) showToast(`검수자: ${v}`);
-}
-
 async function init() {
   loadHandoff();
-  loadReviewerName();
   document.getElementById("hqTask").textContent = state.taskName;
   document.getElementById("hqQuery").textContent = state.queryLabel;
 
   await fetchResults();
   await fetchReviews();          // ③ 서버에서 검수 결과 로드
   renderList();
-  if (state.items.length) selectIndex(state.index);
+  if (state.items.length) await selectIndex(state.index, { autoPlay: true });
   updateDashboard();
+  maybeShowIntro();
 }
 
 async function fetchResults() {
@@ -434,7 +434,7 @@ async function fetchResults() {
   } catch (e) { showToast("검색 실패: " + e.message, true); state.items = []; }
 }
 
-/* ③ 서버에서 검수 결과 조회 (다른 사람이 한 것도 함께 보임) */
+/* ③ 서버에서 검수 결과 조회 */
 async function fetchReviews() {
   try {
     const res = await fetch(`${REVIEWS_API}?task=${encodeURIComponent(state.taskName)}`);
@@ -462,7 +462,6 @@ function renderList() {
   el.innerHTML = state.items.map((h, i) => {
     const rv = state.reviews[h.uuid];
     const status = rv ? rv.status : "";
-    const byOther = rv && rv.reviewer && state.reviewer && rv.reviewer !== state.reviewer;
     const shortRec = (h.recording_id || "").replace("Rec_Drv_GER_", "");
     return `
       <div class="result-item ${i === state.index ? "active" : ""}" data-idx="${i}" onclick="selectIndex(${i})">
@@ -470,7 +469,6 @@ function renderList() {
         <div class="ri-meta">
           <div class="ri-title">${h.whole_second != null ? h.whole_second + "s" : "—"} · ${(h.uuid || "").slice(0,8)}</div>
           <div class="ri-sub">${shortRec}</div>
-          ${byOther ? `<div class="ri-other">by ${rv.reviewer}</div>` : ""}
         </div>
         <div class="ri-status ${status}"></div>
       </div>`;
@@ -481,27 +479,40 @@ function scrollListToActive() {
   if (item) item.scrollIntoView({ block: "nearest", behavior: "smooth" });
 }
 
-/* ══ 항목 선택 ══ */
-function selectIndex(i) {
+/* ══ 항목 선택 ══
+   opts.autoPlay가 true일 때만 -2초 지점부터 자동재생을 시작한다 (최초 진입 시).
+   리스트 클릭 · 이전/다음 버튼 등 "수동으로 특정 프레임을 다시 보려는" 탐색은
+   해당 프레임 정확한 위치에서 일시정지 — 너무 빨리 지나가 Reject를 못 누르는 문제 방지. */
+async function selectIndex(i, opts = {}) {
   if (i < 0 || i >= state.items.length) return;
+  const autoPlay = opts.autoPlay === true;
+  pausePlayback();
+
+  // 하이라이트 도중 다른 항목으로 이동 → 지나간 것으로 간주, 자동 Accept 처리
+  if (state.activeTargetUuid && autoAcceptPending === state.activeTargetUuid) {
+    autoAcceptForUuid(state.activeTargetUuid);
+  }
+  autoAcceptPending = null;
+  state.activeTargetUuid = null;
+
   state.index = i;
   document.querySelectorAll(".result-item").forEach(el =>
     el.classList.toggle("active", Number(el.dataset.idx) === i));
   scrollListToActive();
 
   const h = state.items[i];
-  const sameRec = state.items.filter(x => x.recording_id === h.recording_id);
-  const times = sameRec.map(x => x.timestamp_s).filter(v => v != null);
-  state.recordingSpan = times.length
-    ? { start: Math.min(...times) - 1, end: Math.max(...times) + 1 }
-    : { start: (h.timestamp_s || 0) - 5, end: (h.timestamp_s || 0) + 5 };
-
   state.targetTime = h.timestamp_s;
   state.contextRange = null;
   state.playingEventIdx = -1;
 
-  loadMedia(h);
-  seekAbs(state.targetTime);
+  // 검수 대상들: 같은 recording_id를 가진 검색 결과 전체 (여러 개일 수 있음)
+  state.targetFrames = state.items
+    .filter(x => x.recording_id === h.recording_id)
+    .sort((a, b) => a.timestamp_s - b.timestamp_s);
+
+  await loadRecordingFrames(h);   // 레코딩 전체 프레임 범위 로드 (재생 범위 확장)
+
+  loadMedia(h, { lead: autoPlay });
   renderGantt(h);
   renderTags(h);
   renderTargetCard(h);
@@ -509,6 +520,46 @@ function selectIndex(i) {
   updateNav();
   updateActionButtons();
   updateModeBadge();
+
+  if (autoPlay && introAcknowledged()) startPlayback();
+}
+
+/* ① 레코딩 전체 프레임 범위 로드 — 기존 /api/search 재활용 (recording_id + taskName term 쿼리) */
+async function loadRecordingFrames(h) {
+  const cacheKey = `${h.taskName || state.taskName}|${h.recording_id}`;
+  if (state.recordingFramesKey === cacheKey && state.recordingFrames.length) return;
+
+  try {
+    const res = await fetch(SEARCH_API, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        bool: { must: [
+          { term: { recording_id: h.recording_id } },
+          { term: { taskName: h.taskName || state.taskName } },
+        ] },
+      }),
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    const frames = (data.hits || [])
+      .filter(x => x.timestamp_s != null)
+      .sort((a, b) => a.timestamp_s - b.timestamp_s);
+    if (!frames.length) throw new Error("레코딩 프레임 없음");
+
+    state.recordingFrames = frames;
+    state.recordingFramesKey = cacheKey;
+    state.recordingSpan = { start: frames[0].timestamp_s, end: frames[frames.length - 1].timestamp_s };
+  } catch (e) {
+    // 실패 시 검색 결과 범위로 대체 (기존 동작)
+    const sameRec = state.items.filter(x => x.recording_id === h.recording_id).sort((a, b) => a.timestamp_s - b.timestamp_s);
+    const times = sameRec.map(x => x.timestamp_s).filter(v => v != null);
+    state.recordingFrames = sameRec;
+    state.recordingFramesKey = null;
+    state.recordingSpan = times.length
+      ? { start: Math.min(...times) - 1, end: Math.max(...times) + 1 }
+      : { start: (h.timestamp_s || 0) - 5, end: (h.timestamp_s || 0) + 5 };
+    showToast("레코딩 전체 범위 조회 실패 · 검색 결과 범위로 대체합니다", true);
+  }
 }
 
 function goPrev() { if (state.index > 0) selectIndex(state.index - 1); }
@@ -525,15 +576,6 @@ function renderTargetCard(h) {
   document.getElementById("targetMeta").innerHTML = `
     <div>위치: ${rel}s (${h.whole_second}s 지점)</div>
     <div>uuid: ${(h.uuid||"").slice(0,13)}…</div>`;
-
-  // 다른 사람이 이미 검수한 경우 알림
-  const rv = state.reviews[h.uuid];
-  const box = document.getElementById("otherReviewer");
-  if (rv && rv.reviewer && state.reviewer && rv.reviewer !== state.reviewer) {
-    const when = rv.updated_at ? new Date(rv.updated_at).toLocaleString("ko-KR") : "";
-    box.style.display = "block";
-    box.textContent = `⚠ ${rv.reviewer}님이 이미 "${rv.status}"로 판정 (${when})`;
-  } else { box.style.display = "none"; }
 }
 
 /* ══ 참고 재생 ══ */
@@ -573,25 +615,33 @@ function renderEventList(h) {
 /* ══ 미디어 ══ */
 function resolveVideoUrl(hit) { return null; }   // 영상 경로 확정 시 수정
 
-function loadMedia(hit) {
+function loadMedia(hit, opts = {}) {
   stopFrameLoop();
   const video = document.getElementById("player");
   const framePlayer = document.getElementById("framePlayer");
   const url = resolveVideoUrl(hit);
+  const startAt = opts.lead
+    ? Math.max(state.recordingSpan.start, state.targetTime - PLAYBACK_LEAD_S)
+    : state.targetTime;
   if (url) {
     state.usingFrameMode = false;
     document.getElementById("fallbackNote").style.display = "none";
     framePlayer.style.display = "none"; video.style.display = "block";
     video.src = url;
-    video.onloadedmetadata = () => { seekAbs(state.targetTime); updateTimeline(); };
+    video.onloadedmetadata = () => { seekAbs(startAt); updateTimeline(); };
   } else {
     state.usingFrameMode = true;
     document.getElementById("fallbackNote").style.display = "block";
     video.style.display = "none"; video.removeAttribute("src");
     framePlayer.style.display = "block";
-    state.frameSeq = state.items.filter(x => x.recording_id === hit.recording_id)
-      .sort((a, b) => a.timestamp_s - b.timestamp_s);
-    state.frameIdx = Math.max(0, state.frameSeq.findIndex(x => x.uuid === hit.uuid));
+    state.frameSeq = state.recordingFrames.length ? state.recordingFrames
+      : state.items.filter(x => x.recording_id === hit.recording_id).sort((a, b) => a.timestamp_s - b.timestamp_s);
+    let best = 0, bestDiff = Infinity;
+    state.frameSeq.forEach((f, i) => {
+      const d = Math.abs(f.timestamp_s - startAt);
+      if (d < bestDiff) { bestDiff = d; best = i; }
+    });
+    state.frameIdx = best;
     showFrame(state.frameIdx);
   }
 }
@@ -628,11 +678,73 @@ function seekAbs(absTime) {
   }
 }
 
+/* 현재 재생 위치와 가까운 검수 대상 프레임 찾기 (레코딩 안에 여러 개일 수 있음) */
+function computeActiveTargetFrame() {
+  const abs = currentAbsTime();
+  for (const tf of state.targetFrames) {
+    if (Math.abs(abs - tf.timestamp_s) <= TARGET_TOLERANCE_S) return tf;
+  }
+  return null;
+}
+
+/* ══ ④ 검수 대상 하이라이트 + 기본 Accept 자동 저장 ══
+   하이라이트에 진입하면 autoAcceptPending에 표시해두고, 사용자가 그 사이 아무 판정도
+   내리지 않은 채 하이라이트를 벗어나면(=지나가면) 자동으로 Accept 저장한다. */
 function updateTargetHighlight() {
   const stage = document.getElementById("videoStage");
-  if (state.targetTime == null) { stage.classList.remove("on-target"); return; }
-  stage.classList.toggle("on-target",
-    Math.abs(currentAbsTime() - state.targetTime) <= TARGET_TOLERANCE_S);
+  const active = computeActiveTargetFrame();
+  const activeUuid = active ? active.uuid : null;
+
+  if (activeUuid !== state.activeTargetUuid) {
+    const leavingUuid = state.activeTargetUuid;
+    const wasPending = autoAcceptPending;
+    state.activeTargetUuid = activeUuid;
+
+    if (leavingUuid && wasPending === leavingUuid) autoAcceptForUuid(leavingUuid);
+
+    autoAcceptPending = activeUuid || null;
+    if (active) focusTargetFrame(active);
+
+    document.querySelectorAll(".gantt-target-line, .timeline-target").forEach(el => {
+      el.classList.toggle("active", el.dataset.uuid === activeUuid);
+    });
+  }
+
+  stage.classList.toggle("on-target", !!activeUuid);
+}
+
+/* 하이라이트 중인 프레임에 맞춰 우측 패널(태그/이벤트/리스트)을 갱신 */
+function focusTargetFrame(target) {
+  const idx = state.items.findIndex(x => x.uuid === target.uuid);
+  if (idx < 0) return;
+  state.index = idx;
+  state.targetTime = target.timestamp_s;   // T · ◉ 버튼이 방금 지나간 프레임으로 돌아가도록
+  document.querySelectorAll(".result-item").forEach(el =>
+    el.classList.toggle("active", Number(el.dataset.idx) === idx));
+  scrollListToActive();
+  renderTags(target);
+  renderTargetCard(target);
+  renderEventList(target);
+  updateNav();
+  updateActionButtons();
+}
+
+/* 하이라이트를 그냥 지나친 프레임을 Accept로 자동 저장 (토글 없이 강제 accept) */
+async function autoAcceptForUuid(uuid) {
+  const item = state.targetFrames.find(t => t.uuid === uuid) || state.items.find(x => x.uuid === uuid);
+  if (!item) return;
+  const cur = state.reviews[uuid];
+  if (cur && cur.status === "accept") return;   // 이미 accept면 재저장 불필요
+  await saveReviewForFrame(item, "accept", { toggle: false });
+}
+
+/* 재생이 끝까지 도달했는데 마지막 하이라이트가 미결정으로 남아있으면 자동 Accept 처리 */
+function finalizeAutoAccept() {
+  if (state.activeTargetUuid && autoAcceptPending === state.activeTargetUuid) {
+    const uuid = state.activeTargetUuid;
+    autoAcceptPending = null;
+    autoAcceptForUuid(uuid);
+  }
 }
 
 function jumpToTarget() {
@@ -659,7 +771,7 @@ function startPlayback() {
     stopFrameLoop();
     state.frameTimer = setInterval(() => {
       const next = state.frameIdx + 1;
-      if (next >= state.frameSeq.length) { pausePlayback(); return; }
+      if (next >= state.frameSeq.length) { pausePlayback(); finalizeAutoAccept(); return; }
       if (state.contextRange && state.frameSeq[next].timestamp_s > state.contextRange.end) {
         pausePlayback(); showToast("참고 구간 끝 · ◉ 버튼으로 복귀"); return;
       }
@@ -691,8 +803,12 @@ function updateTimeline() {
   if (span <= 0) return;
   const abs = currentAbsTime();
   const pct = ((abs - state.recordingSpan.start) / span) * 100;
-  const tPct = ((state.targetTime - state.recordingSpan.start) / span) * 100;
-  document.getElementById("tlTarget").style.left = `${Math.max(0, Math.min(100, tPct))}%`;
+
+  document.getElementById("tlTargets").innerHTML = state.targetFrames.map(tf => {
+    const tPct = ((tf.timestamp_s - state.recordingSpan.start) / span) * 100;
+    const activeCls = tf.uuid === state.activeTargetUuid ? " active" : "";
+    return `<div class="timeline-target${activeCls}" data-uuid="${tf.uuid}" style="left:${Math.max(0, Math.min(100, tPct))}%"></div>`;
+  }).join("");
 
   const ctxEl = document.getElementById("tlContext");
   if (state.contextRange) {
@@ -725,11 +841,12 @@ window.addEventListener("mouseup", () => { dragging = false; });
 /* ══ 간트 ══ */
 function collectRecordingEvents(hit) {
   const seen = new Map();
-  state.items.filter(x => x.recording_id === hit.recording_id)
-    .forEach(f => (f.motional_events || []).forEach(ev => {
-      const key = `${ev.scenario}|${ev.start.toFixed(3)}|${ev.end.toFixed(3)}`;
-      if (!seen.has(key)) seen.set(key, ev);
-    }));
+  const pool = state.recordingFrames.length ? state.recordingFrames
+    : state.items.filter(x => x.recording_id === hit.recording_id);
+  pool.forEach(f => (f.motional_events || []).forEach(ev => {
+    const key = `${ev.scenario}|${ev.start.toFixed(3)}|${ev.end.toFixed(3)}`;
+    if (!seen.has(key)) seen.set(key, ev);
+  }));
   return Array.from(seen.values());
 }
 
@@ -771,7 +888,11 @@ function renderGantt(hit) {
       </div>`;
   }).join("");
 
-  const targetPct = ((state.targetTime - state.recordingSpan.start) / span);
+  const targetLines = state.targetFrames.map(tf => {
+    const p = (tf.timestamp_s - state.recordingSpan.start) / span;
+    const activeCls = tf.uuid === state.activeTargetUuid ? " active" : "";
+    return `<div class="gantt-target-line${activeCls}" data-uuid="${tf.uuid}" style="left:calc(215px + (100% - 215px) * ${p});" title="검수 대상 프레임"></div>`;
+  }).join("");
   let ctxBand = "";
   if (state.contextRange) {
     const cs = ((state.contextRange.start - state.recordingSpan.start) / span);
@@ -782,11 +903,12 @@ function renderGantt(hit) {
   let ticks = "";
   for (let t = 0; t <= span; t += tickStep) ticks += `<span class="gantt-tick" style="left:${(t/span)*100}%">${t}s</span>`;
 
+  const initialPct = ((currentAbsTime() - state.recordingSpan.start) / span);
   grid.innerHTML = `
     <div style="position:relative;">
       ${rows}${ctxBand}
-      <div class="gantt-target-line" style="left:calc(215px + (100% - 215px) * ${targetPct});" title="검수 대상 프레임"></div>
-      <div class="gantt-playhead" id="ganttPlayhead" style="left:calc(215px + (100% - 215px) * ${targetPct});"></div>
+      ${targetLines}
+      <div class="gantt-playhead" id="ganttPlayhead" style="left:calc(215px + (100% - 215px) * ${initialPct});"></div>
     </div>
     <div class="gantt-axis"><div></div><div class="gantt-axis-ticks">${ticks}</div></div>`;
   updateGanttPlayhead();
@@ -811,31 +933,44 @@ function renderTags(h) {
   document.getElementById("oddChips").innerHTML = (present + unknown) || `<span class="chip-empty">—</span>`;
 }
 
-/* ══ ③ 검수 판정 → 서버 저장 ══ */
+/* ══ ④ 검수 판정 → 서버 저장 ══
+   재생 중 하이라이트된 프레임이 있으면 그 프레임을, 없으면 현재 선택된(포커스된) 프레임을 대상으로 한다.
+   Reject/Pending을 눌러도 재생은 멈추지 않고 계속 이어간다. */
+function getReviewTargetFrame() {
+  if (state.activeTargetUuid) {
+    return state.targetFrames.find(t => t.uuid === state.activeTargetUuid)
+        || state.items.find(x => x.uuid === state.activeTargetUuid);
+  }
+  return state.items[state.index];
+}
+
 async function setReview(status) {
-  const h = state.items[state.index];
+  const h = getReviewTargetFrame();
   if (!h) return;
 
-  if (!state.reviewer) {
-    showToast("먼저 우측 상단에 검수자 이름을 입력해주세요", true);
-    document.getElementById("reviewerInput").focus();
-    return;
-  }
+  await saveReviewForFrame(h, status, { toggle: true });
 
+  // 지금 하이라이트 중인 프레임을 수동으로 판정했으므로, 자동 accept 대상에서 제외
+  if (state.activeTargetUuid === h.uuid) autoAcceptPending = null;
+}
+
+async function saveReviewForFrame(h, status, opts = {}) {
+  const toggle = opts.toggle !== false;
   const cur = state.reviews[h.uuid];
-  const newStatus = (cur && cur.status === status) ? "" : status;   // 같은 버튼 → 해제
+  const newStatus = (toggle && cur && cur.status === status) ? "" : status;   // 같은 버튼 → 해제 (수동 판정에만 적용)
 
   // 낙관적 갱신 (먼저 화면에 반영하고, 실패 시 되돌림)
   const prev = state.reviews[h.uuid];
   if (newStatus) {
     state.reviews[h.uuid] = {
-      status: newStatus, reviewer: state.reviewer,
+      status: newStatus,
       updated_at: new Date().toISOString(),
     };
   } else delete state.reviews[h.uuid];
 
   updateActionButtons(); updateDashboard();
-  const dot = document.querySelector(`.result-item[data-idx="${state.index}"] .ri-status`);
+  const idx = state.items.findIndex(x => x.uuid === h.uuid);
+  const dot = idx >= 0 ? document.querySelector(`.result-item[data-idx="${idx}"] .ri-status`) : null;
   if (dot) dot.className = `ri-status ${newStatus}`;
 
   setSyncState("saving", "저장 중…");
@@ -849,7 +984,6 @@ async function setReview(status) {
         recording_id: h.recording_id,
         whole_second: h.whole_second,
         status: newStatus,
-        reviewer: state.reviewer,
       }),
     });
     const data = await res.json();
@@ -861,14 +995,11 @@ async function setReview(status) {
     updateActionButtons(); updateDashboard(); renderList();
     setSyncState("error", "저장 실패");
     showToast("저장 실패: " + e.message, true);
-    return;
   }
-
-  if (newStatus && state.index < state.items.length - 1) setTimeout(goNext, 220);
 }
 
 function updateActionButtons() {
-  const h = state.items[state.index];
+  const h = getReviewTargetFrame();
   const rv = h ? state.reviews[h.uuid] : null;
   const cur = rv ? rv.status : null;
   document.getElementById("btnAccept").classList.toggle("on", cur === "accept");
@@ -911,7 +1042,7 @@ function updateDashboard() {
 function exportReviewCSV() {
   if (!state.items.length) { showToast("내보낼 데이터가 없습니다", true); return; }
   const schema = TASK_SCHEMAS[state.taskName] || { tagKey:"", envFields:[], targetFields:[] };
-  const header = ["review_status","reviewer","reviewed_at","uuid","taskName","recording_id",
+  const header = ["review_status","reviewed_at","uuid","taskName","recording_id",
     "whole_second","timestamp_s","imagePath",
     ...schema.envFields, ...schema.targetFields, "motional_scenarios","motional_exact","motional_events"];
   const rows = state.items.map(h => {
@@ -919,7 +1050,7 @@ function exportReviewCSV() {
     const rv = state.reviews[h.uuid] || {};
     const evStr = (h.motional_events||[]).map(e =>
       `${e.scenario}[${e.start.toFixed(2)}~${e.end.toFixed(2)}${e.exact?",exact":""}]`).join(";");
-    return [ rv.status || "none", rv.reviewer || "", rv.updated_at || "",
+    return [ rv.status || "none", rv.updated_at || "",
       h.uuid, h.taskName, h.recording_id, h.whole_second, h.timestamp_s, h.imagePath,
       ...schema.envFields.map(k => t[k]||""), ...schema.targetFields.map(k => t[k]||""),
       (h.motional_scenarios||[]).join(";"), (h.motional_exact||[]).join(";"), evStr,
@@ -934,9 +1065,35 @@ function exportReviewCSV() {
   showToast("CSV를 내려받았습니다");
 }
 
+/* ══ ④-1 진입 안내 모달 ══ */
+function introAcknowledged() {
+  try { return localStorage.getItem(INTRO_SEEN_KEY) === "1"; } catch (e) { return false; }
+}
+
+function maybeShowIntro() {
+  if (!introAcknowledged()) showIntro();
+}
+
+function showIntro() {
+  pausePlayback();
+  document.getElementById("introModal").style.display = "flex";
+}
+window.showIntro = showIntro;
+
+function dismissIntro() {
+  try { localStorage.setItem(INTRO_SEEN_KEY, "1"); } catch (e) {}
+  document.getElementById("introModal").style.display = "none";
+  startPlayback();
+}
+window.dismissIntro = dismissIntro;
+
 /* ══ 단축키 ══ */
 document.addEventListener("keydown", e => {
   if (["INPUT","TEXTAREA"].includes(e.target.tagName)) return;
+  if (document.getElementById("introModal").style.display === "flex") {
+    if (e.key === "Enter") dismissIntro();
+    return;
+  }
   switch (e.key.toLowerCase()) {
     case "a": setReview("accept"); break;
     case "r": setReview("reject"); break;
