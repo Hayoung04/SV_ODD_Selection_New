@@ -1,7 +1,42 @@
 """
-원본 파일 기준으로 "정답"을 다시 계산해서, Elasticsearch에 실제 저장된 문서와
-전수 대조하는 검증 스크립트. unified_pipeline.py와 로직은 같지만 독립적으로
-다시 계산해서, "파이프라인이 실제로 한 일"이 맞는지 재확인하는 용도.
+audit_pipeline.py
+===================
+unified_pipeline.py가 실제로 색인한 결과가 맞는지 독립적으로 재검증하는
+감사(audit) 스크립트.
+
+원본 ODD/Motional 파일들을 파이프라인과 "같은 로직이지만 별도로 다시
+구현한 코드"로 처음부터 다시 계산해서 '정답'을 만든 뒤, 그 정답을
+Elasticsearch에 실제로 저장되어 있는 문서와 하나하나 전수 대조한다.
+파이프라인 코드를 그대로 재사용해 정답을 만들면 파이프라인 자체의 버그를
+잡아낼 수 없기 때문에, 일부러 별도로 재구현함 (extract_timestamp_s,
+load_motional_events, match_motional 로직을 이 파일 안에 독립적으로
+다시 작성해둔 이유).
+
+사용법:
+    python3 audit_pipeline.py
+
+[동작 순서]
+  1) build_expected() — ODD 태스크 폴더(AAA1, LSD)를 처음부터 다시 스캔해,
+     (taskName, recording_id, 정수초)별로 가장 가까운 프레임을 골라
+     '기대값'(uuid, tags, motional_scenarios/exact/events)을 재계산
+  2) 각 기대값에 대해 실제 Elasticsearch 문서(doc_id 규칙: taskName-
+     recording_id-정수초)를 조회해, 아래 5가지 항목을 모두 비교:
+       ① uuid 일치 (1fps 다운샘플링에서 실제로 가장 가까운 프레임이 뽑혔는지)
+       ② ODD 태그(tags) 내용 일치
+       ③ motional_scenarios(태그명 목록) 일치
+       ④ motional_exact(정확 매칭 목록) 일치
+       ⑤ motional_events(구간 상세 정보) 일치 — 부동소수점 오차 방지를 위해
+          normalize_events()로 반올림 후 비교
+  3) 전체 검사 대상 수, 완전 일치 수, 불일치/누락 수를 출력하고
+     불일치 건은 최대 20개까지 사유와 함께 상세 출력
+
+[검증 이력]
+  976건 전수 대조 결과 불일치 0건 확인 (폴링 경로 초기 검증 시).
+  Kafka로 유입된 데이터에 대해서도 동일한 방식의 전수 검증이 필요하며,
+  현재는 샘플 2건만 수동 확인된 상태 — 정식 audit 실행은 아직 미실시.
+
+[환경 변수 — .env]
+  ES_USER, ES_PASS : Elasticsearch 인증 정보
 """
 import json
 import os

@@ -1,9 +1,40 @@
 """
-실제 Kafka에서 메시지를 계속 받아서 처리하는 상시 구동용 Consumer.
-처리 성공 시에만 오프셋을 커밋해서, 중간에 죽어도 메시지 유실이 없게 함.
+kafka_consumer.py
+==================
+dev.shared.odd-tagging.input 토픽을 상시 구독하며, 새 메시지가 도착할
+때마다 kafka_message_handler.process_kafka_message()로 넘겨 처리하는
+상시 구동형 Consumer.
 
 사용법:
-    python3 kafka_consumer.py
+    python3 kafka_consumer.py   (Ctrl+C로 종료)
+
+[Consumer Group]
+  group.id: odd-selection-consumer
+  (ODD 서비스 등 다른 서비스와는 별도 그룹으로 동일 토픽을 독립적으로 구독함.
+   peek_topic.py 등 읽기 전용 확인용 스크립트와도 그룹을 분리해서 운영)
+
+[오프셋 커밋 정책 — 처리 성공 시에만 커밋]
+  enable.auto.commit = False 로 자동 커밋을 끄고, 메시지 처리가 성공했을
+  때만 수동으로 commit() 호출.
+    → 처리 도중 예외가 나거나(예: Elasticsearch 다운) 실패하면 오프셋이
+      커밋되지 않으므로, Consumer를 재시작하면 그 메시지부터 자동으로
+      다시 처리됨 (메시지 유실 방지). 실제로 ES 컨테이너가 다운됐을 때
+      이 재처리 동작으로 데이터 유실 없이 복구된 사례 있음.
+  각 메시지는 최대 3회(MAX_RETRY)까지 재시도 후에도 실패하면 커밋하지 않고
+  다음 메시지로 넘어감 (로그에 실패한 파티션/오프셋을 남겨 추적 가능하게 함)
+
+[색인 큐 flush 주기]
+  unified_pipeline.py의 Bulk 색인 큐를 5초(FLUSH_INTERVAL_S)마다 강제로
+  비움 — 메시지가 뜸하게 들어와도 색인 지연이 오래 쌓이지 않도록 함.
+  종료 시(Ctrl+C)에도 남은 큐를 마지막으로 한 번 더 비운 뒤 종료.
+
+[인증]
+  AWS MSK IAM 인증(OAUTHBEARER) 사용. Python 클라이언트는 AWS_MSK_IAM이
+  아닌 OAUTHBEARER 메커니즘만 지원하므로 oauth_cb에서 매 토큰 발급 시
+  MSKAuthTokenProvider로 리전 서명된 토큰을 발급받음.
+
+[환경 변수 — .env]
+  KAFKA_BROKER, KAFKA_REGION, AWS_PROFILE(기본값 odd-msk)
 """
 import os
 import time

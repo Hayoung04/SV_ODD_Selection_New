@@ -1,3 +1,48 @@
+"""
+unified_pipeline.py
+====================
+ODD 태깅 데이터(AAA1/LSD)와 Motional 시나리오 데이터를 통합해
+Elasticsearch(odd-frames-v2)에 색인하는 폴링 기반 파이프라인.
+
+[전체 흐름]
+  5초(POLL_INTERVAL)마다 두 폴더를 반복 스캔:
+    1) DATA_ROOT/motional        → Motional 시나리오 이벤트 파일
+    2) DATA_ROOT/{AAA1,LSD}      → ODD 태깅 결과 파일 (10fps, 프레임 1장 = 파일 1개)
+
+  ODD 파일을 발견하면:
+    - imagePath 파일명에서 마이크로초 단위 촬영 시각을 추출
+    - 같은 정수초(whole_second) 안에서는 가장 오차 작은 프레임 1장만 남김
+      → 10fps 원본을 1fps로 다운샘플링 (문서 ID를 taskName-recording_id-정수초로
+        고정해, 더 정확한 프레임이 나중에 오면 자동 덮어쓰기됨)
+    - 같은 recording_id의 Motional 이벤트와 시각(±0.5초, WINDOW_HALF_S) 기준으로
+      매칭해 motional_scenarios(태그명)/motional_exact(정확 매칭)/
+      motional_events(실제 구간 정보) 필드를 함께 채워 하나의 문서로 병합
+    - 최대 500건(BULK_SIZE) 단위로 모아 Elasticsearch _bulk API로 색인
+
+  Motional 파일을 ODD보다 나중에 발견하면(늦은 도착):
+    - 해당 recording_id로 이미 색인되어 있는 ODD 문서들을 ES에서 다시 조회
+    - Motional 이벤트로 재매칭해서 필요한 문서만 업데이트 (rematch_recording)
+    → ODD/Motional 중 어느 쪽이 먼저 도착해도 최종적으로는 항상 병합된 결과가 남음
+
+[핵심 설계]
+  - "조금이라도 겹치면 매칭"이 원칙: 이벤트 구간과 프레임 시각(±0.5초) 사이에
+    조금이라도 겹침이 있으면 태그 부여(놓치는 것 방지), 실제로 그 시각에
+    구간 안에 있는 것만 별도로 exact 표시
+  - 이미 색인된 문서와 값이 완전히 같으면 재색인하지 않음(불필요한 쓰기 방지)
+  - 이 스크립트의 통합 처리 로직(다운샘플링·매칭·병합)은 데이터 유입 경로가
+    폴링이든 Kafka든 동일하게 재사용되도록 설계됨
+    (Kafka 경로: kafka_message_handler.py가 이 파일의 함수들을 그대로 import)
+
+[환경 변수 — .env]
+  ES_USER, ES_PASS : Elasticsearch 인증 정보
+
+[주요 상수]
+  DATA_ROOT       : 원본 데이터 루트 경로
+  ODD_TASK_NAMES   : 스캔 대상 태스크명 목록 (AAA1, LSD)
+  POLL_INTERVAL    : 폴더 재스캔 주기 (초)
+  WINDOW_HALF_S    : Motional 매칭 허용 오차 (±초)
+  BULK_SIZE        : Bulk 색인 배치 크기
+"""
 import json
 import os
 import time
