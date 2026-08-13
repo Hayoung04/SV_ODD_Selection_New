@@ -121,6 +121,10 @@
   .target-card-title { font-size: 10.5px; font-weight: 800; color: var(--accent-ink); letter-spacing: 0.04em; margin-bottom: 8px; }
   .target-thumb { width: 100%; border-radius: var(--radius-sm); background: #12141c; display: block; margin-bottom: 8px; }
   .target-meta { font-family: var(--font-mono); font-size: 10.5px; color: var(--accent-ink); line-height: 1.7; }
+  .target-meta-row { display: flex; align-items: center; gap: 6px; }
+  .uuid-copy-btn { flex-shrink: 0; border: 1px solid rgba(115,0,240,0.3); background: white; color: var(--accent-ink); border-radius: 5px; font-size: 10px; padding: 1px 6px; cursor: pointer; font-family: var(--font); font-weight: 600; }
+  .uuid-copy-btn:hover { background: var(--accent); color: white; }
+  .uuid-copy-btn.copied { background: var(--green-wash); color: var(--green); border-color: var(--green); }
 
   .tag-section { padding: 14px 16px; border-bottom: 1px solid var(--line); }
   .tag-section:last-child { border-bottom: none; }
@@ -573,10 +577,44 @@ function updateNav() {
 function renderTargetCard(h) {
   document.getElementById("targetThumb").src = IMAGE_API + encodeURIComponent(h.imagePath || "");
   const rel = ((h.timestamp_s || 0) - state.recordingSpan.start).toFixed(1);
+  const uuid = h.uuid || "";
+  const safeUuid = uuid.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
   document.getElementById("targetMeta").innerHTML = `
     <div>위치: ${rel}s (${h.whole_second}s 지점)</div>
-    <div>uuid: ${(h.uuid||"").slice(0,13)}…</div>`;
+    <div class="target-meta-row">
+      <span>uuid: ${uuid.slice(0,13)}…</span>
+      <button class="uuid-copy-btn" onclick="copyUuid(this, '${safeUuid}')">⧉ 복사</button>
+    </div>`;
 }
+
+function copyUuid(btn, uuid) {
+  const showCopied = () => {
+    const original = btn.textContent;
+    btn.textContent = "복사됨"; btn.classList.add("copied");
+    setTimeout(() => { btn.textContent = original; btn.classList.remove("copied"); }, 1200);
+  };
+  const fallbackCopy = () => {
+    const ta = document.createElement("textarea");
+    ta.value = uuid;
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.focus(); ta.select();
+    try {
+      document.execCommand("copy");
+      showCopied();
+    } catch (e) {
+      alert("복사 실패: 브라우저가 클립보드 접근을 지원하지 않습니다.");
+    }
+    document.body.removeChild(ta);
+  };
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(uuid).then(showCopied).catch(fallbackCopy);
+  } else {
+    fallbackCopy();
+  }
+}
+window.copyUuid = copyUuid;
 
 /* ══ 참고 재생 ══ */
 function playEventContext(idx) {

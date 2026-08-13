@@ -270,7 +270,6 @@
       </div>
     </div>
     
-    <div class="schema-flag">⚠ LD_General/OD_General은 엑셀의 "ODD Class" 값을 필드명으로 가정 구성. present/absent/unknown 방식인지, taskName 문자열이 정확한지 호연 확인 전.</div>
   </header>
 
   <main class="main">
@@ -750,11 +749,31 @@ async function runSearch(opts = {}) {
 }
 
 function copyPath(btn, fullPath) {
-  navigator.clipboard.writeText(fullPath).then(() => {
+  const showCopied = () => {
     const original = btn.textContent;
     btn.textContent = "복사됨"; btn.classList.add("copied");
     setTimeout(() => { btn.textContent = original; btn.classList.remove("copied"); }, 1200);
-  });
+  };
+  const fallbackCopy = () => {
+    const ta = document.createElement("textarea");
+    ta.value = fullPath;
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.focus(); ta.select();
+    try {
+      document.execCommand("copy");
+      showCopied();
+    } catch (e) {
+      alert("복사 실패: 브라우저가 클립보드 접근을 지원하지 않습니다.");
+    }
+    document.body.removeChild(ta);
+  };
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(fullPath).then(showCopied).catch(fallbackCopy);
+  } else {
+    fallbackCopy();
+  }
 }
 window.copyPath = copyPath;
 
