@@ -218,6 +218,22 @@
 
   .chip-group { display: flex; flex-wrap: wrap; gap: 8px; align-content: flex-start; }
 
+  .ai-search-panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow); padding: 18px 20px; margin-bottom: 22px; }
+  .ai-search-title { font-size: 13.5px; font-weight: 700; color: var(--accent-ink); display: flex; align-items: center; gap: 6px; margin-bottom: 12px; }
+  .ai-search-row { display: flex; gap: 8px; }
+  .ai-search-row input { flex: 1; padding: 10px 14px; border: 1px solid var(--line); border-radius: var(--radius-sm); font-family: var(--font); font-size: 13px; color: var(--ink); background: white; }
+  .ai-search-row input:focus { outline: none; border-color: var(--accent); }
+  .ai-search-hint { font-size: 11px; color: var(--ink-faint); margin-top: 8px; }
+  .ai-search-summary { margin-top: 12px; background: var(--accent-wash); color: var(--accent-ink); border-radius: var(--radius-sm); padding: 9px 12px; font-size: 12px; font-family: var(--font-mono); line-height: 1.6; word-break: break-word; }
+  .ai-search-warnings { margin-top: 8px; background: var(--amber-wash); color: #96650f; border-radius: var(--radius-sm); padding: 9px 12px; font-size: 12px; line-height: 1.7; }
+  .ai-search-row button:disabled { opacity: 0.6; cursor: not-allowed; }
+  .ai-search-spinner {
+    display: inline-block; width: 10px; height: 10px; border-radius: 50%;
+    border: 2px solid rgba(115,0,240,0.25); border-top-color: var(--accent-ink);
+    animation: ai-spin 0.7s linear infinite; vertical-align: -1px; margin-right: 4px;
+  }
+  @keyframes ai-spin { to { transform: rotate(360deg); } }
+
   .state-block { text-align: center; padding: 60px 20px; color: var(--ink-faint); font-size: 13.5px; background: white; }
   .state-block .icon { font-size: 26px; margin-bottom: 10px; opacity: 0.4; }
   .error-box { background: var(--red-wash); border: 1px solid #f3c1cb; color: #b4283f; padding: 12px 16px; border-radius: var(--radius-sm); font-size: 13px; margin-bottom: 16px; }
@@ -301,6 +317,17 @@
     <div class="topbar">
       <div class="breadcrumb">Tools / <b>Frame Search</b></div>
       <div class="search-box" id="queryStrip">query: <span class="tok-key">match_all</span></div>
+    </div>
+
+    <div class="ai-search-panel">
+      <div class="ai-search-title">✦ AI 자연어 검색 (AAA1 + LSD + Motional 전용)</div>
+      <div class="ai-search-row">
+        <input type="text" id="aiQueryInput" placeholder="예: 야간 우천 시 보행자 많은 장면" onkeydown="if(event.key==='Enter'){ event.preventDefault(); runNLQuery(); }">
+        <button class="btn-primary" id="aiSearchBtn" onclick="runNLQuery()">AI 검색</button>
+      </div>
+      <div class="ai-search-hint">기존 체크박스 필터와는 별개로 동작합니다 (taskName은 항상 AAA1 기준으로 검색).</div>
+      <div class="ai-search-summary" id="aiQuerySummary" style="display:none;"></div>
+      <div class="ai-search-warnings" id="aiQueryWarnings" style="display:none;"></div>
     </div>
 
     <div class="stat-row">
@@ -483,6 +510,8 @@ let motionalSelected = new Set(); // 카테고리 전환과 무관하게 유지�
 let activeMotionalCatIndex = 0;
 let lastKnownCount = null;
 let autoRefreshTimer = null;
+let lastSearchMode = "checkbox";  // "checkbox" | "ai" — statFilters가 어느 상태를 반영할지
+let lastAIConditionCount = 0;     // AI 검색으로 파싱된 조건 개수 (lastSearchMode === "ai"일 때만 사용)
 
 // ══════════════════════════════════════════
 //  알림 토스트
@@ -716,11 +745,16 @@ function getCheckedMotionalTags() {
 }
 
 function onFilterChange() {
+  lastSearchMode = "checkbox";
   updateStatFilters();
   updateQueryPreview();
 }
 
 function updateStatFilters() {
+  if (lastSearchMode === "ai") {
+    document.getElementById("statFilters").textContent = lastAIConditionCount;
+    return;
+  }
   const envCount = Object.keys(getEnvFilters()).length;
   const targetCount = Object.keys(targetChipState).length;
   const motionalCount = getCheckedMotionalTags().length;
@@ -770,6 +804,154 @@ function buildQuery() {
 
   return { bool: { must } };
 }
+
+// ══════════════════════════════════════════
+//  AI 자연어 검색 (기존 체크박스 필터와 완전히 별개 · AAA1 + LSD + Motional 전용)
+// ══════════════════════════════════════════
+
+// v10 파서가 내놓은 중첩 {"all"/"any"/atomic} 트리를 ES bool 쿼리로 재귀 변환
+// atomic 조건 하나가 스키마 어디에도 없어 건너뛴 경우 null을 리턴하고, all/any는 그 null들을 걸러냄
+function buildESQueryFromParsed(node) {
+  if (!node) return { match_all: {} };
+
+  if (node.all) {
+    const clauses = node.all.map(buildESQueryFromParsed).filter(Boolean);
+    if (!clauses.length) return { match_all: {} };
+    return { bool: { must: clauses } };
+  }
+  if (node.any) {
+    const clauses = node.any.map(buildESQueryFromParsed).filter(Boolean);
+    if (!clauses.length) return { match_all: {} };
+    return { bool: { should: clauses, minimum_should_match: 1 } };
+  }
+
+  if (node.field === "motional_scenario") {
+    return { term: { motional_scenarios: node.value } };
+  }
+  if (node.field === "aaa1_tag") {
+    // key가 AAA1 소속인지 LSD 소속인지 확인해서 올바른 필드 경로로 매핑
+    if (TASK_SCHEMAS.AAA1.targetFields.includes(node.key)) {
+      return { term: { [`tags.aaa1_tags.${node.key}`]: node.value } };
+    }
+    if (TASK_SCHEMAS.LSD.targetFields.includes(node.key)) {
+      return { term: { [`tags.lsd_tags.${node.key}`]: node.value } };
+    }
+    console.warn(`[AI 검색] AAA1/LSD 어디에도 없는 태그 key라 건너뜀: ${node.key}`);
+    return null;
+  }
+  if (node.field === "time" || node.field === "da_road_type" || node.field === "weather") {
+    // 촬영조건은 지금까지 AAA1 경로(tags.aaa1_tags.*)만 가정하고 있음.
+    // LSD 문서에도 이 경로가 실제로 존재하는지는 아직 확인 전 — LSD 대상 AI 검색이
+    // 이상하게 0건만 나온다면 이 가정이 원인일 수 있음.
+    return { term: { [`tags.aaa1_tags.${node.field}`]: node.value } };
+  }
+  return null;
+}
+
+// 파싱된 조건 트리를 사람이 읽을 수 있는 요약 문자열로 변환 (안내 영역 표시용)
+function describeParsedQuery(node) {
+  if (!node) return "";
+  if (node.all) return "(" + node.all.map(describeParsedQuery).filter(Boolean).join(" AND ") + ")";
+  if (node.any) return "(" + node.any.map(describeParsedQuery).filter(Boolean).join(" OR ") + ")";
+  if (node.field === "motional_scenario") return `motional=${node.value}`;
+  if (node.field === "aaa1_tag") {
+    const schemaLabel = TASK_SCHEMAS.AAA1.targetFields.includes(node.key)
+      ? "AAA1"
+      : (TASK_SCHEMAS.LSD.targetFields.includes(node.key) ? "LSD" : "?");
+    return `[${schemaLabel}] ${node.key}=${node.value}`;
+  }
+  if (node.field === "time" || node.field === "da_road_type" || node.field === "weather") return `${node.field}=${node.value}`;
+  return "";
+}
+
+// 파싱된 조건 트리의 leaf(atomic condition) 개수를 재귀적으로 합산 (statFilters 표시용)
+function countParsedConditions(node) {
+  if (!node) return 0;
+  if (node.all) return node.all.reduce((sum, child) => sum + countParsedConditions(child), 0);
+  if (node.any) return node.any.reduce((sum, child) => sum + countParsedConditions(child), 0);
+  return 1;
+}
+
+// 서버(validate_and_sanitize)의 내부 디버그 문자열이 혹시라도 그대로 넘어올 경우를 대비한
+// 이중 안전장치 — "[검증 실패로 제거됨] ..." 형태면 한 줄 전체를 사용자 친화적 문구로 치환
+function renderUnmappedLine(t) {
+  if (typeof t === "string" && t.startsWith("[검증 실패로 제거됨]")) {
+    return "⚠ AI가 제안했으나 태깅 리스트에 없어 자동 제외된 조건이 있습니다";
+  }
+  return `⚠ 해당 조건은 태깅 리스트에 없습니다: ${t}`;
+}
+
+async function runNLQuery() {
+  const input = document.getElementById("aiQueryInput");
+  const text = input.value.trim();
+  const summaryEl = document.getElementById("aiQuerySummary");
+  const warnEl = document.getElementById("aiQueryWarnings");
+  const btn = document.getElementById("aiSearchBtn");
+  summaryEl.style.display = "none"; summaryEl.innerHTML = "";
+  warnEl.style.display = "none"; warnEl.innerHTML = "";
+
+  if (!text) {
+    warnEl.style.display = "block";
+    warnEl.innerHTML = "⚠ 검색어를 입력하세요";
+    return;
+  }
+
+  document.getElementById("errorBox").innerHTML = "";
+  document.getElementById("resultArea").innerHTML = `<div class="state-block"><div class="icon">…</div>검색 중</div>`;
+  summaryEl.style.display = "block";
+  summaryEl.innerHTML = `<span class="ai-search-spinner"></span> AI가 문장을 분석하고 있습니다...`;
+
+  const btnOriginalText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = "분석 중...";
+
+  try {
+    const parseRes = await fetch("/api/nlquery", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query: text }),
+    });
+    const parsed = await parseRes.json();
+    if (parsed.error) throw new Error(parsed.error);
+
+    summaryEl.textContent = parsed.query
+      ? `AI가 이해한 조건: ${describeParsedQuery(parsed.query)}`
+      : "AI가 이해한 조건: 없음 (매칭되는 조건을 찾지 못했습니다)";
+
+    if (parsed.unmapped_terms && parsed.unmapped_terms.length) {
+      warnEl.style.display = "block";
+      warnEl.innerHTML = parsed.unmapped_terms.map(renderUnmappedLine).join("<br>");
+    }
+
+    lastSearchMode = "ai";
+    lastAIConditionCount = countParsedConditions(parsed.query);
+    updateStatFilters();
+
+    const esQuery = buildESQueryFromParsed(parsed.query) || { match_all: {} };
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(esQuery),
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    lastResults = data.hits;
+    document.getElementById("statTotal").textContent = data.hits.length;
+    document.getElementById("statMatched").textContent = data.hits.length;
+    document.getElementById("queryStrip").textContent = `query(AI): ${text}`;
+    renderResults(data.hits, "AAA1");
+  } catch (err) {
+    document.getElementById("errorBox").innerHTML = `<div class="error-box">AI 검색 실패: ${err.message}</div>`;
+    document.getElementById("resultArea").innerHTML = "";
+    document.getElementById("statMatched").textContent = "오류";
+    document.getElementById("exportBtn").disabled = true;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = btnOriginalText;
+  }
+}
+window.runNLQuery = runNLQuery;
 
 async function runSearch(opts = {}) {
   const silent = opts.silent === true;
@@ -838,21 +1020,38 @@ function openReview(startIndex) {
 }
 window.openReview = openReview;
 
-function renderResults(hits) {
+function renderResults(hits, taskNameOverride) {
   document.getElementById("exportBtn").disabled = hits.length === 0;
   if (hits.length === 0) { document.getElementById("resultArea").innerHTML = `<div class="state-block"><div class="icon">∅</div>조건에 맞는 프레임이 없습니다.</div>`; return; }
 
-  const taskName = currentTaskName();
+  const taskName = taskNameOverride || currentTaskName();
   const schema = TASK_SCHEMAS[taskName];
 
   const cards = hits.map((h, idx) => {
-    const tagObjKey = `${taskName.toLowerCase()}_tags`;
-    const t = (schema && h.tags && h.tags[tagObjKey]) || {};
-    
-    const envChips = schema ? schema.envFields.filter(f => t[f.key]).map(f => `<span class="badge env">${t[f.key]}</span>`).join("") : "";
-    const presentChipsStr = schema ? schema.targetFields.filter(f => t[f] === "present").map(f => `<span class="tag-chip">${f}</span>`).join("") : "";
-    const unknownChipsStr = schema ? schema.targetFields.filter(f => t[f] === "unknown").map(f => `<span class="tag-chip unknown">${f}</span>`).join("") : "";
-    
+    let envChipsArr = [], presentChipsArr = [], unknownChipsArr = [];
+
+    if (taskNameOverride) {
+      // AI 검색 결과는 AAA1 태그를 가진 문서와 LSD 태그를 가진 문서가 섞여 나올 수 있으므로
+      // 하나로 고정하지 않고 두 스키마를 각각 확인해서 존재하는 것들을 모두 같이 보여줌
+      [TASK_SCHEMAS.AAA1, TASK_SCHEMAS.LSD].forEach(s => {
+        const tagObjKey = s.tagFieldPrefix.replace(/^tags\./, "").replace(/\.$/, "");
+        const st = (h.tags && h.tags[tagObjKey]) || {};
+        envChipsArr.push(...s.envFields.filter(f => st[f.key]).map(f => `<span class="badge env">${st[f.key]}</span>`));
+        presentChipsArr.push(...s.targetFields.filter(f => st[f] === "present").map(f => `<span class="tag-chip">${f}</span>`));
+        unknownChipsArr.push(...s.targetFields.filter(f => st[f] === "unknown").map(f => `<span class="tag-chip unknown">${f}</span>`));
+      });
+    } else {
+      const tagObjKey = `${taskName.toLowerCase()}_tags`;
+      const t = (schema && h.tags && h.tags[tagObjKey]) || {};
+      envChipsArr = schema ? schema.envFields.filter(f => t[f.key]).map(f => `<span class="badge env">${t[f.key]}</span>`) : [];
+      presentChipsArr = schema ? schema.targetFields.filter(f => t[f] === "present").map(f => `<span class="tag-chip">${f}</span>`) : [];
+      unknownChipsArr = schema ? schema.targetFields.filter(f => t[f] === "unknown").map(f => `<span class="tag-chip unknown">${f}</span>`) : [];
+    }
+
+    const envChips = envChipsArr.join("");
+    const presentChipsStr = presentChipsArr.join("");
+    const unknownChipsStr = unknownChipsArr.join("");
+
     const targetChips = `
       ${presentChipsStr ? `<div class="chip-group">${presentChipsStr}</div>` : ''}
       ${unknownChipsStr ? `<div class="chip-group" style="margin-top: 0px">${unknownChipsStr}</div>` : ''}

@@ -18,6 +18,9 @@ import mimetypes
 import base64
 from datetime import datetime, timezone
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from vllm_query_parser_v13 import parse_query as nlp_parse_query
+
 PORT = int(os.environ.get("UI_PORT", "8080"))
 
 ES_URL = os.environ.get("ES_URL", "http://localhost:9200")
@@ -249,6 +252,20 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 self._send_json({"ok": True, "saved": doc})
             except Exception as e:
                 self._send_json({"error": str(e)}, status=500)
+            return
+
+        # AI 자연어 검색: 문장을 파싱해 Boolean 조건 트리로 변환
+        if parsed.path == "/api/nlquery":
+            try:
+                body = json.loads(raw)
+                user_text = (body.get("query") or "").strip()
+                if not user_text:
+                    self._send_json({"error": "검색어를 입력하세요"}, status=400)
+                    return
+                result = nlp_parse_query(user_text)
+                self._send_json(result)
+            except Exception as e:
+                self._send_json({"error": f"AI 검색 파싱 실패: {e}"}, status=500)
             return
 
         self.send_error(404, "Not Found")
