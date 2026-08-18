@@ -2,6 +2,15 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
+<script>
+(function() {
+  try {
+    var saved = localStorage.getItem("odd_theme");
+    var theme = saved || (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    document.documentElement.setAttribute("data-theme", theme);
+  } catch (e) { /* localStorage 접근 불가 시 기본(라이트) 유지 */ }
+})();
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ODD Frame Review</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,10 +24,28 @@
     --amber: #d98a1c; --amber-wash: #fdf3e2;
     --blue: #2f7ff0; --blue-wash: #e9f2ff;
     --red: #e0435a; --red-wash: #fdeaed;
+    --surface-2: #fafbfc;
+    --track: #d3d5e2; --track-2: #eceef5;
+    --motional-bg: #d6f0e5; --motional-text: #0f7a53;
+    --toast-bg: #1e2130;
     --radius-lg: 16px; --radius-md: 12px; --radius-sm: 8px;
     --shadow: 0 1px 2px rgba(20,20,50,0.04), 0 4px 16px rgba(20,20,50,0.05);
     --font: 'Inter', sans-serif;
     --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  }
+  :root[data-theme="dark"] {
+    --bg: #14151c; --panel: #1c1e28; --line: #2b2e3c;
+    --ink: #e9eaf2; --ink-soft: #9296b2; --ink-faint: #676b83;
+    --accent: #a06bf5; --accent-2: #b981f7; --accent-wash: rgba(160,107,245,0.18); --accent-ink: #cba8fb;
+    --green: #34d399; --green-wash: rgba(52,211,153,0.16);
+    --amber: #e8ac4c; --amber-wash: rgba(232,172,76,0.16);
+    --blue: #63a4ff; --blue-wash: rgba(99,164,255,0.16);
+    --red: #f4707f; --red-wash: rgba(244,112,127,0.16);
+    --surface-2: #23252f;
+    --track: #3c4157; --track-2: #2b2f3d;
+    --motional-bg: rgba(52,211,153,0.2); --motional-text: #6fe3b8;
+    --toast-bg: #2c2f42;
+    --shadow: 0 1px 2px rgba(0,0,0,0.35), 0 4px 20px rgba(0,0,0,0.4);
   }
   * { box-sizing: border-box; }
   html, body { height: 100%; margin: 0; }
@@ -37,7 +64,7 @@
 
   .btn { font-family: var(--font); font-weight: 600; font-size: 13px; border-radius: var(--radius-sm); border: none; padding: 9px 15px; cursor: pointer; transition: opacity 0.12s, transform 0.05s; }
   .btn:active { transform: translateY(1px); }
-  .btn-ghost { background: white; color: var(--ink-soft); border: 1px solid var(--line); }
+  .btn-ghost { background: var(--panel); color: var(--ink-soft); border: 1px solid var(--line); }
   .btn-ghost:hover { background: var(--bg); }
   .btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: white; }
 
@@ -51,16 +78,16 @@
   .panel-count { font-size: 11px; color: var(--ink-faint); font-family: var(--font-mono); }
   .panel-body { flex: 1; overflow-y: auto; min-height: 0; }
   .panel-body::-webkit-scrollbar { width: 6px; }
-  .panel-body::-webkit-scrollbar-thumb { background: #d3d5e2; border-radius: 4px; }
+  .panel-body::-webkit-scrollbar-thumb { background: var(--ink-faint); border-radius: 4px; }
 
   .result-item { padding: 11px 14px; border-bottom: 1px solid var(--line); cursor: pointer; display: flex; gap: 11px; align-items: center; transition: background 0.1s; border-left: 3px solid transparent; }
-  .result-item:hover { background: #fafbff; }
+  .result-item:hover { background: var(--surface-2); }
   .result-item.active { background: var(--accent-wash); border-left-color: var(--accent); }
   .ri-thumb { width: 62px; height: 38px; object-fit: cover; border-radius: 5px; background: #1e2130; flex-shrink: 0; }
   .ri-meta { min-width: 0; flex: 1; }
   .ri-title { font-family: var(--font-mono); font-size: 11px; font-weight: 600; }
   .ri-sub { font-size: 10.5px; color: var(--ink-faint); font-family: var(--font-mono); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .ri-status { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; background: #dcdee8; }
+  .ri-status { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; background: var(--track); }
   .ri-status.accept { background: var(--green); }
   .ri-status.reject { background: var(--red); }
   .ri-status.pending { background: var(--amber); }
@@ -83,15 +110,15 @@
   .fallback-note { position: absolute; bottom: 10px; left: 12px; background: rgba(217,138,28,0.9); color: white; font-size: 10px; font-weight: 600; padding: 3px 9px; border-radius: 999px; display: none; }
 
   .video-controls { padding: 11px 16px; display: flex; align-items: center; gap: 12px; border-top: 1px solid var(--line); }
-  .ctrl-btn { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--line); background: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }
+  .ctrl-btn { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--line); background: var(--panel); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }
   .ctrl-btn:hover { background: var(--accent-wash); border-color: var(--accent); color: var(--accent-ink); }
   .ctrl-btn.primary { background: var(--accent-wash); border-color: rgba(115,0,240,0.3); color: var(--accent-ink); width: auto; border-radius: var(--radius-sm); padding: 0 12px; font-size: 11.5px; font-weight: 700; }
   .ctrl-btn.primary:hover { background: var(--accent); color: white; }
 
   .timeline-wrap { flex: 1; position: relative; height: 30px; display: flex; align-items: center; cursor: pointer; }
-  .timeline-track { position: absolute; left: 0; right: 0; height: 6px; background: #e6e8f0; border-radius: 999px; }
+  .timeline-track { position: absolute; left: 0; right: 0; height: 6px; background: var(--track-2); border-radius: 999px; }
   .timeline-context { position: absolute; height: 6px; background: rgba(128,133,160,0.28); border-radius: 999px; }
-  .timeline-played { position: absolute; height: 6px; background: #b9bdd0; border-radius: 999px; }
+  .timeline-played { position: absolute; height: 6px; background: var(--ink-faint); border-radius: 999px; }
   .timeline-target { position: absolute; width: 3px; height: 20px; background: var(--accent); border-radius: 2px; transform: translateX(-50%); pointer-events: none; box-shadow: 0 0 7px rgba(115,0,240,0.7); }
   .timeline-target.active { background: var(--accent-2); box-shadow: 0 0 10px rgba(147,51,245,0.9); }
   .timeline-head { position: absolute; width: 12px; height: 12px; border-radius: 50%; background: white; border: 2.5px solid var(--ink-soft); transform: translateX(-50%); box-shadow: 0 1px 4px rgba(0,0,0,0.2); pointer-events: none; }
@@ -104,8 +131,8 @@
   .gantt-label { font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-soft); text-align: right; padding-right: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .gantt-row.is-active .gantt-label { color: var(--accent-ink); font-weight: 700; }
   .gantt-lane { position: relative; height: 22px; }
-  .gantt-lane::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: #f0f1f7; }
-  .gantt-bar { position: absolute; top: 5px; height: 12px; border-radius: 3px; background: #dcdee8; min-width: 3px; cursor: pointer; transition: transform 0.1s; }
+  .gantt-lane::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: var(--track-2); }
+  .gantt-bar { position: absolute; top: 5px; height: 12px; border-radius: 3px; background: var(--track); min-width: 3px; cursor: pointer; transition: transform 0.1s; }
   .gantt-bar:hover { transform: scaleY(1.3); }
   .gantt-bar.matched { background: #b39ddb; }
   .gantt-bar.playing { background: var(--accent); box-shadow: 0 0 0 2px rgba(115,0,240,0.35); }
@@ -117,12 +144,12 @@
   .gantt-axis-ticks { position: relative; height: 16px; }
   .gantt-tick { position: absolute; font-family: var(--font-mono); font-size: 9.5px; color: var(--ink-faint); transform: translateX(-50%); }
 
-  .target-card { margin: 14px 16px; padding: 12px; border-radius: var(--radius-md); background: linear-gradient(135deg, var(--accent-wash), #fbf7ff); border: 1.5px solid rgba(115,0,240,0.3); }
+  .target-card { margin: 14px 16px; padding: 12px; border-radius: var(--radius-md); background: linear-gradient(135deg, var(--accent-wash), var(--surface-2)); border: 1.5px solid rgba(115,0,240,0.3); }
   .target-card-title { font-size: 10.5px; font-weight: 800; color: var(--accent-ink); letter-spacing: 0.04em; margin-bottom: 8px; }
   .target-thumb { width: 100%; border-radius: var(--radius-sm); background: #12141c; display: block; margin-bottom: 8px; }
   .target-meta { font-family: var(--font-mono); font-size: 10.5px; color: var(--accent-ink); line-height: 1.7; }
   .target-meta-row { display: flex; align-items: center; gap: 6px; }
-  .uuid-copy-btn { flex-shrink: 0; border: 1px solid rgba(115,0,240,0.3); background: white; color: var(--accent-ink); border-radius: 5px; font-size: 10px; padding: 1px 6px; cursor: pointer; font-family: var(--font); font-weight: 600; }
+  .uuid-copy-btn { flex-shrink: 0; border: 1px solid rgba(115,0,240,0.3); background: var(--panel); color: var(--accent-ink); border-radius: 5px; font-size: 10px; padding: 1px 6px; cursor: pointer; font-family: var(--font); font-weight: 600; }
   .uuid-copy-btn:hover { background: var(--accent); color: white; }
   .uuid-copy-btn.copied { background: var(--green-wash); color: var(--green); border-color: var(--green); }
 
@@ -138,25 +165,25 @@
   .chip-empty { color: var(--ink-faint); font-size: 11px; }
 
   .event-list { display: flex; flex-direction: column; gap: 7px; }
-  .event-card { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px 10px; cursor: pointer; background: white; transition: all 0.12s; display: flex; flex-direction: column; gap: 4px; }
-  .event-card:hover { border-color: var(--ink-soft); background: #fafbfd; }
-  .event-card.playing { border-color: var(--accent); background: #fcfaff; }
+  .event-card { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px 10px; cursor: pointer; background: var(--panel); transition: all 0.12s; display: flex; flex-direction: column; gap: 4px; }
+  .event-card:hover { border-color: var(--ink-soft); background: var(--surface-2); }
+  .event-card.playing { border-color: var(--accent); background: var(--accent-wash); }
   .ec-name { font-family: var(--font-mono); font-size: 11px; font-weight: 700; word-break: break-all; }
   .event-card.nearby .ec-name { color: var(--ink-soft); font-weight: 500; }
   .ec-meta { display: flex; justify-content: space-between; align-items: center; font-family: var(--font-mono); font-size: 9.5px; color: var(--ink-faint); }
   .ec-tag { padding: 1px 6px; border-radius: 999px; font-weight: 700; font-size: 9px; }
-  .ec-tag.exact { background: #d6f0e5; color: #0f7a53; }
-  .ec-tag.nearby { background: #f0f1f7; color: var(--ink-faint); }
+  .ec-tag.exact { background: var(--motional-bg); color: var(--motional-text); }
+  .ec-tag.nearby { background: var(--track-2); color: var(--ink-faint); }
 
   .nav-row { display: flex; gap: 8px; padding: 14px 16px 0; }
-  .nav-btn { flex: 1; padding: 10px; border: 1px solid var(--line); background: white; border-radius: var(--radius-sm); cursor: pointer; font-size: 14px; font-weight: 600; }
+  .nav-btn { flex: 1; padding: 10px; border: 1px solid var(--line); background: var(--panel); border-radius: var(--radius-sm); cursor: pointer; font-size: 14px; font-weight: 600; }
   .nav-btn:hover:not(:disabled) { background: var(--accent-wash); border-color: var(--accent); color: var(--accent-ink); }
   .nav-btn:disabled { opacity: 0.35; cursor: not-allowed; }
   .nav-pos { display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 12px; color: var(--ink-soft); min-width: 72px; }
 
   .dashboard { background: var(--panel); border-top: 1px solid var(--line); padding: 14px 26px; display: flex; align-items: center; gap: 26px; flex-wrap: wrap; flex-shrink: 0; }
   .action-group { display: flex; gap: 9px; }
-  .action-btn { padding: 11px 22px; border-radius: var(--radius-sm); border: 1.5px solid; font-weight: 700; font-size: 13.5px; cursor: pointer; background: white; transition: all 0.1s; }
+  .action-btn { padding: 11px 22px; border-radius: var(--radius-sm); border: 1.5px solid; font-weight: 700; font-size: 13.5px; cursor: pointer; background: var(--panel); transition: all 0.1s; }
   .action-btn.accept { border-color: var(--green); color: var(--green); }
   .action-btn.accept:hover, .action-btn.accept.on { background: var(--green); color: white; }
   .action-btn.reject { border-color: var(--red); color: var(--red); }
@@ -182,7 +209,7 @@
 
   .progress-block { flex: 1; min-width: 180px; }
   .progress-head { display: flex; justify-content: space-between; font-size: 11.5px; color: var(--ink-soft); margin-bottom: 6px; }
-  .progress-bar { height: 9px; border-radius: 999px; background: #eceef5; overflow: hidden; display: flex; }
+  .progress-bar { height: 9px; border-radius: 999px; background: var(--track-2); overflow: hidden; display: flex; }
   .progress-seg { height: 100%; }
   .progress-seg.accept { background: var(--green); }
   .progress-seg.reject { background: var(--red); }
@@ -190,7 +217,7 @@
 
   .state-block { text-align: center; padding: 40px 20px; color: var(--ink-faint); font-size: 13px; }
   #toastContainer { position: fixed; top: 18px; right: 18px; z-index: 9999; display: flex; flex-direction: column; gap: 9px; pointer-events: none; }
-  .toast { background: var(--ink); color: white; padding: 11px 16px; border-radius: var(--radius-md); box-shadow: 0 8px 26px rgba(20,20,50,0.28); font-size: 12.5px; font-weight: 500; animation: toastIn 0.25s cubic-bezier(0.16,1,0.3,1); }
+  .toast { background: var(--toast-bg); color: white; padding: 11px 16px; border-radius: var(--radius-md); box-shadow: 0 8px 26px rgba(20,20,50,0.28); font-size: 12.5px; font-weight: 500; animation: toastIn 0.25s cubic-bezier(0.16,1,0.3,1); }
   .toast.err { background: var(--red); }
   @keyframes toastIn { from { opacity:0; transform: translateX(30px);} to {opacity:1; transform:none;} }
 
@@ -235,6 +262,7 @@
     <span class="hq-label">Query</span>
     <span class="hq-val" id="hqQuery">—</span>
   </div>
+  <button class="btn btn-ghost" id="themeToggleBtn" onclick="toggleTheme()" title="라이트/다크 모드 전환">🌙 다크</button>
   <button class="btn btn-ghost" onclick="location.href='/index.html'">← 검색으로</button>
   <button class="btn btn-ghost" onclick="showIntro()">? 안내 다시 보기</button>
   <button class="btn btn-primary" onclick="exportReviewCSV()">↓ Export CSV</button>
@@ -334,7 +362,7 @@
       <div class="legend-row"><span class="legend-dot" style="background:var(--green)"></span><span class="legend-name">Accept</span><span class="legend-val" id="cntAccept">0</span></div>
       <div class="legend-row"><span class="legend-dot" style="background:var(--red)"></span><span class="legend-name">Reject</span><span class="legend-val" id="cntReject">0</span></div>
       <div class="legend-row"><span class="legend-dot" style="background:var(--amber)"></span><span class="legend-name">Pending</span><span class="legend-val" id="cntPending">0</span></div>
-      <div class="legend-row"><span class="legend-dot" style="background:#dcdee8"></span><span class="legend-name">미검수</span><span class="legend-val" id="cntNone">0</span></div>
+      <div class="legend-row"><span class="legend-dot" style="background:var(--track)"></span><span class="legend-name">미검수</span><span class="legend-val" id="cntNone">0</span></div>
     </div>
   </div>
 
@@ -1152,7 +1180,25 @@ function showToast(msg, isError = false, ms = 2600) {
   setTimeout(() => t.remove(), ms);
 }
 
-window.addEventListener("DOMContentLoaded", init);
+// ══════════════════════════════════════════
+//  라이트/다크 테마
+// ══════════════════════════════════════════
+function updateThemeToggleUI(theme) {
+  const btn = document.getElementById("themeToggleBtn");
+  if (btn) btn.textContent = theme === "dark" ? "☀️ 라이트" : "🌙 다크";
+}
+function toggleTheme() {
+  const root = document.documentElement;
+  const next = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
+  root.setAttribute("data-theme", next);
+  try { localStorage.setItem("odd_theme", next); } catch (e) { /* 저장 실패해도 화면 전환은 유지 */ }
+  updateThemeToggleUI(next);
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+  updateThemeToggleUI(document.documentElement.getAttribute("data-theme"));
+  init();
+});
 window.addEventListener("resize", () => { updateTimeline(); updateGanttPlayhead(); });
 </script>
 
