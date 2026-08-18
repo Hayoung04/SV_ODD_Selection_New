@@ -29,6 +29,8 @@
     --shadow: 0 1px 2px rgba(20,20,50,0.04), 0 4px 16px rgba(20,20,50,0.05);
     --font: 'Inter', sans-serif;
     --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+    /* 도로/객체 상태(FrontVision) 패널과 Motional Scenarios 패널이 항상 같은 높이를 갖도록 공유하는 값 */
+    --side-panel-height: 305px;
   }
   * { box-sizing: border-box; }
   html, body { width: 100%; overflow-x: hidden; }
@@ -55,16 +57,17 @@
   .live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); display: inline-block; animation: pulse 2s infinite; }
   @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
-  .tf-body { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; align-items: start; }
+  .tf-body { display: grid; grid-template-columns: 1fr 1fr 1.65fr; gap: 24px; align-items: start; }
   @media (max-width: 900px) { .tf-body { grid-template-columns: 1fr; } }
-  .tf-col { display: flex; flex-direction: column; }
+  .tf-col { display: flex; flex-direction: column; min-width: 0; }
 
   .nav-label { font-size: 11px; font-weight: 600; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.04em; padding: 0 4px 8px; display: flex; justify-content: space-between; align-items: center; }
   .nav-hint { font-size: 10px; color: var(--ink-faint); text-transform: none; letter-spacing: 0; font-weight: 400; }
-  
+
   .filter-card { background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius-md); padding: 14px; margin-bottom: 16px; }
-  
-  .scrollable-panel { max-height: 305px; overflow-y: auto; padding-right: 10px; }
+
+  /* height(고정, max-height 아님)로 둬서 콘텐츠 양과 무관하게 항상 --side-panel-height 만큼 차지 */
+  .scrollable-panel { height: var(--side-panel-height); overflow-y: auto; padding-right: 10px; scrollbar-width: thin; scrollbar-color: var(--ink-faint) transparent; }
   .scrollable-panel::-webkit-scrollbar { width: 6px; }
   .scrollable-panel::-webkit-scrollbar-thumb { background: var(--ink-faint); border-radius: 4px; }
 
@@ -86,20 +89,39 @@
   .chip-toggle.active[data-value="absent"] { background: var(--gray-active); color: white; border-color: var(--gray-active); }
   .chip-toggle.active[data-value="unknown"] { background: var(--amber); color: white; border-color: var(--amber); }
 
-  .accordion-cat { border: 1px solid var(--line); border-radius: var(--radius-sm); margin-bottom: 6px; background: white; overflow: hidden; }
-  .accordion-head { display: flex; justify-content: space-between; align-items: center; padding: 9px 11px; cursor: pointer; font-size: 12.5px; font-weight: 600; color: var(--ink); user-select: none; font-family: var(--font-mono); }
-  .accordion-head:hover { background: var(--bg); }
-  .accordion-head .meta { display: flex; align-items: center; gap: 6px; }
-  .accordion-head .arrow { font-size: 10px; color: var(--ink-faint); transition: transform 0.15s; }
-  .accordion-cat.open .arrow { transform: rotate(90deg); }
-  .accordion-body { display: none; padding: 4px 8px 8px; border-top: 1px solid var(--line); }
-  .accordion-cat.open .accordion-body { display: block; }
   label.chk { display: flex; align-items: center; gap: 8px; font-size: 11.5px; padding: 5px 6px; border-radius: 7px; cursor: pointer; color: #454a5e; transition: background 0.12s; font-family: var(--font-mono); }
   label.chk:hover { background: var(--bg); }
   label.chk input { appearance: none; width: 15px; height: 15px; border: 1.5px solid #d3d5e2; border-radius: 5px; background: white; display: grid; place-content: center; flex-shrink: 0; cursor: pointer; }
   label.chk input:checked { background: var(--accent); border-color: var(--accent); }
   label.chk input:checked::after { content: ""; width: 7px; height: 4.5px; border-left: 2px solid white; border-bottom: 2px solid white; transform: rotate(-45deg) translate(0.5px, -1px); }
   .cat-badge-count { background: var(--accent-wash); color: var(--accent-ink); font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 999px; }
+
+  /* .filter-card(패딩 10px/17px + border 1px씩)이 자식 콘텐츠(305px)를 완전히 감싸도록 최소 높이를 명시.
+     계산이 아닌 auto sizing에만 기대면 flex-shrink 등으로 카드가 자식보다 작아질 수 있어 안전장치로 고정.
+     세로 방향은 min-height로 이미 자식(305px)을 완전히 감싸도록 보장되므로 overflow-y는 clip할 필요가 없음.
+     overflow-x만 안전장치로 hidden 처리 (혹시 모를 가로 넘침 시 스크롤바가 잘리는 대신 카드 안에서 가려짐) */
+  .tf-col-motional .filter-card { min-height: calc(var(--side-panel-height) + 29px); overflow-x: hidden; overflow-y: visible; }
+  .motional-split { display: flex; gap: 8px; min-width: 0; }
+  /* --side-panel-height를 그대로 재사용 → 옆 FrontVision 패널과 항상 정확히 같은 높이, 카테고리와 무관 */
+  .motional-cat-list { width: 150px; flex-shrink: 0; height: var(--side-panel-height); overflow-y: auto; padding-right: 6px; border-right: 1px solid var(--line); scrollbar-width: thin; scrollbar-color: var(--ink-faint) transparent; }
+
+  /* 폭을 고정 px가 아니라 flex:1로 부모(.motional-split, 곧 1.65fr 컬럼)가 준 나머지 공간만큼만 사용.
+     overflow-y: scroll → 내용이 짧아도 스크롤 트랙 자리를 항상 확보해 스크롤바가 사라지지 않게 함.
+     padding-right를 넉넉히(14px) 둬서 스크롤바가 텍스트에 붙지 않고 카드 안쪽에 여유 있게 자리잡음 */
+  .motional-tag-panel { flex: 1 1 0; min-width: 0; height: var(--side-panel-height); overflow-y: scroll; padding-left: 8px; padding-right: 14px; scrollbar-width: thin; scrollbar-color: var(--ink-faint) transparent; }
+  .motional-tag-panel label.chk span { overflow-wrap: anywhere; }
+  .motional-cat-list::-webkit-scrollbar, .motional-tag-panel::-webkit-scrollbar { width: 6px; }
+  .motional-cat-list::-webkit-scrollbar-thumb, .motional-tag-panel::-webkit-scrollbar-thumb { background: var(--ink-faint); border-radius: 4px; }
+  .motional-cat-item {
+    display: flex; justify-content: space-between; align-items: center; gap: 6px;
+    padding: 9px 9px; border-radius: 7px; cursor: pointer; user-select: none;
+    font-size: 11.5px; font-weight: 600; color: var(--ink); margin-bottom: 3px;
+    font-family: var(--font-mono); transition: background 0.12s, color 0.12s;
+  }
+  .motional-cat-item:hover { background: var(--bg); }
+  .motional-cat-item.active { background: var(--accent-wash); color: var(--accent-ink); }
+  .motional-cat-item .cat-badge-count { flex-shrink: 0; }
+  label.chk.select-all { font-weight: 700; border-bottom: 1px solid var(--line); border-radius: 0; margin-bottom: 4px; padding-bottom: 9px; }
 
   .btn-row { display: flex; gap: 8px; }
   button { font-family: var(--font); font-weight: 600; font-size: 13.5px; border-radius: var(--radius-sm); border: none; padding: 11px 16px; cursor: pointer; transition: opacity 0.12s, transform 0.05s, box-shadow 0.12s; }
@@ -259,13 +281,16 @@
 
       <div class="tf-col" id="targetSection"></div>
 
-      <div class="tf-col">
+      <div class="tf-col tf-col-motional">
         <div class="nav-label">
           <span>Motional Scenarios (58)</span>
           <span class="nav-hint">복수 선택 시 OR</span>
         </div>
         <div class="filter-card" style="padding: 10px 4px 17px 10px;">
-          <div id="motionalAccordion" class="scrollable-panel"></div>
+          <div class="motional-split">
+            <div id="motionalCatList" class="motional-cat-list"></div>
+            <div id="motionalTagPanel" class="motional-tag-panel"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -380,90 +405,82 @@ const TASK_SCHEMAS = {
   },
 };
 
-// ── Motional 58종: 원본 태그 그대로, 병합 없이 각각 개별 항목 ──
+// ── Motional 58종: 원본 태그 그대로, 병합 없이 각각 개별 항목 (5개 대분류로 재편) ──
 const MOTIONAL_CATEGORIES = [
-  { cat: "traffic_light_intersection", tags: [
-    "starting_straight_traffic_light_intersection_traversal",
-    "traversing_traffic_light_intersection",
-    "on_traffic_light_intersection",
-    "on_stopline_traffic_light",
-    "accelerating_at_traffic_light",
-    "accelerating_at_traffic_light_with_lead",
-    "accelerating_at_traffic_light_without_lead",
-    "stationary_at_traffic_light_with_lead",
-    "stationary_at_traffic_light_without_lead",
-    "stopping_at_traffic_light_with_lead",
-    "stopping_at_traffic_light_without_lead",
+  { cat: "ego_motion", label: "Ego Motion", tags: [
+    "stationary",
+    "low_magnitude_speed",
+    "medium_magnitude_speed",
+    "high_magnitude_speed",
+    "high_magnitude_jerk",
+    "high_lateral_acceleration",
+    "stationary_in_traffic",
   ]},
-  { cat: "crosswalk", tags: [
-    "traversing_crosswalk",
-    "on_stopline_crosswalk",
-    "accelerating_at_crosswalk",
-    "stationary_at_crosswalk",
-    "stopping_at_crosswalk",
-    "waiting_for_pedestrian_to_cross",
-    "near_pedestrian_on_crosswalk",
-    "near_pedestrian_on_crosswalk_with_ego",
-  ]},
-  { cat: "intersection_turning", tags: [
-    "traversing_intersection",
-    "on_intersection",
-    "starting_u_turn",
-    "starting_left_turn",
-    "starting_right_turn",
-    "starting_high_speed_turn",
-    "starting_low_speed_turn",
-  ]},
-  { cat: "lane_change", tags: [
+  { cat: "ego_maneuver", label: "Ego Maneuver", tags: [
     "changing_lane",
     "changing_lane_to_left",
     "changing_lane_to_right",
     "changing_lane_with_lead",
     "changing_lane_with_trail",
+    "starting_left_turn",
+    "starting_right_turn",
+    "starting_high_speed_turn",
+    "starting_low_speed_turn",
+    "starting_u_turn",
+    "traversing_intersection",
+    "traversing_traffic_light_intersection",
+    "traversing_crosswalk",
+    "starting_straight_traffic_light_intersection_traversal",
     "following_lane_with_lead",
     "following_lane_with_slow_lead",
     "following_lane_without_lead",
   ]},
-  { cat: "stationary_stopping", tags: [
-    "stationary",
-    "stationary_in_traffic",
+  { cat: "vehicle_relationship", label: "Vehicle Relationship", tags: [
+    "accelerating_at_traffic_light",
+    "accelerating_at_traffic_light_with_lead",
+    "accelerating_at_traffic_light_without_lead",
+    "accelerating_at_crosswalk",
+    "stationary_at_traffic_light_with_lead",
+    "stationary_at_traffic_light_without_lead",
+    "stationary_at_crosswalk",
+    "stopping_at_traffic_light_with_lead",
+    "stopping_at_traffic_light_without_lead",
+    "stopping_at_crosswalk",
     "stopping_with_lead",
     "stopping_without_lead",
-  ]},
-  { cat: "behind", tags: [
-    "behind_pedestrian_on_driveable",
     "behind_bike",
     "behind_long_vehicle",
     "behind_motorcycle",
+    "behind_pedestrian_on_driveable",
   ]},
-  { cat: "crossed_by", tags: [
+  { cat: "road_context_state", label: "Road / Context State", tags: [
+    "on_carpark",
+    "on_intersection",
+    "on_traffic_light_intersection",
+    "on_stopline_traffic_light",
+    "on_stopline_crosswalk",
+  ]},
+  { cat: "interaction_event", label: "Interaction / Event", tags: [
+    "waiting_for_pedestrian_to_cross",
     "crossed_by_bike",
     "crossed_by_vehicle",
     "crossed_by_motorcycle",
-  ]},
-  { cat: "near", tags: [
-    "near_barrier_on_driveable",
-    "near_high_speed_vehicle",
-    "near_long_vehicle",
     "near_multiple_bikes",
-    "near_multiple_pedestrians",
     "near_multiple_vehicles",
     "near_multiple_motorcycle",
-  ]},
-  { cat: "speed_acceleration", tags: [
-    "high_lateral_acceleration",
-    "high_magnitude_jerk",
-    "high_magnitude_speed",
-    "low_magnitude_speed",
-    "medium_magnitude_speed",
-  ]},
-  { cat: "other", tags: [
-    "on_carpark",
+    "near_multiple_pedestrians",
+    "near_pedestrian_on_crosswalk",
+    "near_pedestrian_on_crosswalk_with_ego",
+    "near_high_speed_vehicle",
+    "near_long_vehicle",
+    "near_barrier_on_driveable",
   ]},
 ];
 
 let lastResults = [];
 let targetChipState = {};   // { fieldKey: Set("present", "unknown") }
+let motionalSelected = new Set(); // 카테고리 전환과 무관하게 유지되는 전체 선택 상태
+let activeMotionalCatIndex = 0;
 let lastKnownCount = null;
 let autoRefreshTimer = null;
 
@@ -629,35 +646,63 @@ function toggleTargetChip(btn) {
 
 function onTaskNameChange() { renderTaskSchemaSections(); onFilterChange(); runSearch(); }
 
-function buildMotionalAccordion() {
-  const el = document.getElementById("motionalAccordion");
-  el.innerHTML = MOTIONAL_CATEGORIES.map((group, gi) => `
-    <div class="accordion-cat" id="cat-${gi}">
-      <div class="accordion-head" onclick="toggleAccordion(${gi})">
-        <span>${group.cat}</span>
-        <span class="meta"><span class="cat-badge-count" id="catcount-${gi}"></span><span class="arrow">▶</span></span>
+function renderMotionalCatList() {
+  const el = document.getElementById("motionalCatList");
+  el.innerHTML = MOTIONAL_CATEGORIES.map((g, gi) => {
+    const count = g.tags.filter(t => motionalSelected.has(t)).length;
+    return `
+      <div class="motional-cat-item ${gi === activeMotionalCatIndex ? "active" : ""}" onclick="selectMotionalCategory(${gi})">
+        <span>${g.label}</span>
+        <span class="cat-badge-count" style="display:${count > 0 ? "inline-block" : "none"}">${count}</span>
       </div>
-      <div class="accordion-body">
-        ${group.tags.map(tag => `
-          <label class="chk">
-            <input type="checkbox" data-cat="${gi}" value="${tag}" onchange="onFilterChange()">
-            <span>${tag}</span>
-          </label>
-        `).join("")}
-      </div>
-    </div>
-  `).join("");
-  MOTIONAL_CATEGORIES.forEach((g, gi) => updateCatCount(gi));
+    `;
+  }).join("");
 }
-buildMotionalAccordion();
 
-function toggleAccordion(gi) { document.getElementById(`cat-${gi}`).classList.toggle("open"); }
+function renderMotionalTagPanel() {
+  const el = document.getElementById("motionalTagPanel");
+  const g = MOTIONAL_CATEGORIES[activeMotionalCatIndex];
+  const allChecked = g.tags.length > 0 && g.tags.every(t => motionalSelected.has(t));
+  el.innerHTML = `
+    <label class="chk select-all">
+      <input type="checkbox" ${allChecked ? "checked" : ""} onchange="toggleMotionalSelectAll(this)">
+      <span>전체 (${g.tags.length})</span>
+    </label>
+    ${g.tags.map(tag => `
+      <label class="chk">
+        <input type="checkbox" value="${tag}" ${motionalSelected.has(tag) ? "checked" : ""} onchange="toggleMotionalTag(this)">
+        <span>${tag}</span>
+      </label>
+    `).join("")}
+  `;
+}
 
-function updateCatCount(gi) {
-  const checked = document.querySelectorAll(`#motionalAccordion input[data-cat="${gi}"]:checked`).length;
-  const badge = document.getElementById(`catcount-${gi}`);
-  badge.textContent = checked > 0 ? checked : "";
-  badge.style.display = checked > 0 ? "inline-block" : "none";
+function buildMotionalPanels() {
+  renderMotionalCatList();
+  renderMotionalTagPanel();
+}
+buildMotionalPanels();
+
+function selectMotionalCategory(gi) {
+  activeMotionalCatIndex = gi;
+  renderMotionalCatList();
+  renderMotionalTagPanel();
+}
+
+function toggleMotionalTag(input) {
+  if (input.checked) motionalSelected.add(input.value);
+  else motionalSelected.delete(input.value);
+  renderMotionalCatList();
+  onFilterChange();
+}
+
+function toggleMotionalSelectAll(input) {
+  const g = MOTIONAL_CATEGORIES[activeMotionalCatIndex];
+  if (input.checked) g.tags.forEach(t => motionalSelected.add(t));
+  else g.tags.forEach(t => motionalSelected.delete(t));
+  renderMotionalTagPanel();
+  renderMotionalCatList();
+  onFilterChange();
 }
 
 function getEnvFilters() {
@@ -667,11 +712,10 @@ function getEnvFilters() {
 }
 
 function getCheckedMotionalTags() {
-  return Array.from(document.querySelectorAll('#motionalAccordion input:checked')).map(el => el.value);
+  return Array.from(motionalSelected);
 }
 
 function onFilterChange() {
-  MOTIONAL_CATEGORIES.forEach((g, gi) => updateCatCount(gi));
   updateStatFilters();
   updateQueryPreview();
 }
@@ -699,7 +743,9 @@ function resetFilters() {
   document.querySelectorAll('#envSection select[data-env]').forEach(el => el.value = "");
   document.querySelectorAll('#targetSection .chip-toggle').forEach(b => b.classList.remove("active"));
   targetChipState = {};
-  document.querySelectorAll('#motionalAccordion input[type=checkbox]').forEach(el => el.checked = false);
+  motionalSelected = new Set();
+  renderMotionalCatList();
+  renderMotionalTagPanel();
   onFilterChange();
   runSearch();
 }
