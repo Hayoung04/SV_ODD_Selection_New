@@ -18,8 +18,8 @@ import mimetypes
 import base64
 from datetime import datetime, timezone
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from vllm_query_parser_v14 import parse_query as nlp_parse_query
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "query_proto"))
+from vllm_query_parser_v18 import parse_query as nlp_parse_query
 
 PORT = int(os.environ.get("UI_PORT", "8080"))
 

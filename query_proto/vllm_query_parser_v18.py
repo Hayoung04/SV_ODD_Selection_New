@@ -1,7 +1,115 @@
 # -*- coding: utf-8 -*-
 """
-13단계 프로토타입: vLLM(Qwen) 쿼리 파서 v13
-v12 대비 변경점 - 전체 체크리스트 15문장 재검증 중 발견된 3개 버그 대응:
+18단계 프로토타입: vLLM(Qwen) 쿼리 파서 v18
+v17 대비 변경점 - LSD-implies-night을 프롬프트 의존에서 코드 결정론적 보장으로 전환:
+  batch8/9에서 프롬프트(taxonomy 구조화, recency 리마인더)로 LSD-implies-night 규칙을
+  안정화하려 했으나 11개 필드 중 4개에서 여전히 불안정하게 실패함. 이 규칙은 LSD 태깅 정의
+  자체가 "모든 LSD 데이터는 야간"이라고 명시하는 100% 확정적 도메인 규칙이므로, 모델 판단에
+  맡기지 않고 validate_and_sanitize() 이후 단계에서 결정론적으로 보장하도록 전환
+  (v10에서 hallucination 방어를 프롬프트+코드 이중 방어로 처리했던 것과 동일한 접근).
+
+대응:
+  - 코드: enforce_lsd_implies_night() 추가. query 트리(all/any 재귀, atomic 포함)를 순회해서
+    aaa1_tag의 key가 LSD_TARGET_NAMES에 속하는 조건을 포함하는 모든 AND 레벨에 대해
+    time=night이 없으면 auto:true로 추가. 이미 time=night이 있으면 그대로 두고(auto 플래그도
+    기존 값 유지), time=day/dawn_evening처럼 모순되는 값이 있으면 건드리지 않고 경고만 로그로
+    남김. any(OR) 그룹은 분기마다 독립적으로 재귀 처리하므로 LSD 태그가 있는 분기에만 night이
+    붙음. parse_query()에서 validate_and_sanitize() 직후, 최종 리턴 전에 호출.
+  - 프롬프트: 이제 코드가 100% 보장하므로 관련 텍스트 삭제해서 토큰 절감 - Rule 17 본문,
+    "[lsd target tags]" 헤더 아래 메타 문구(batch8), 파일 끝 recency 리마인더(batch9),
+    camera_torn_frame few-shot 예시 전부 제거. taxonomy 목록 자체(필드명+설명)는 그대로 유지 -
+    필드 인식(매칭) 자체는 여전히 모델이 해야 하므로.
+
+v17 대비 변경점 (참고, 그대로 유지) - "lost in the middle" 가설의 최소 변경 검증:
+  batch8에서 LSD-implies-night 규칙이 11개 필드 중 5개(low_streetlight_road,
+  oncoming_vehicle_far_60m, oncoming_vehicle_taillight_cluster, reflector_white_all,
+  sign_white_heavy_reflection)에서 여전히 미발동. 시스템 프롬프트가 이미 ~8,700토큰(서버
+  max_model_len 12,000)이라 프롬프트 중간부 내용에 대한 attention이 약해지는 "lost in the
+  middle" 현상이 원인일 수 있다는 가설을 세움.
+  이번 batch 목표: 프롬프트 전체 압축/구조 개편은 다음 batch로 미루고, 이 가설만 최소
+  변경으로 빠르게 검증.
+
+대응:
+  - SYSTEM_PROMPT_TEMPLATE 맨 끝(마지막 few-shot 예시 다음, 즉 시스템 메시지의 끝 = 유저
+    메시지 바로 직전)에 3~4줄짜리 짧은 리마인더 블록 추가. taxonomy 헤더 아래(batch8)와
+    Rule 17 본문에 이미 있는 내용을 세 번째로 반복하되, 아주 짧게 유지해 토큰 증가를 최소화.
+    recency 효과를 노림 - 이 위치가 실제로 SYSTEM_PROMPT_TEMPLATE의 마지막 줄이고,
+    parse_query()의 messages 리스트에서 system 메시지 바로 다음이 user 메시지이므로, 모델이
+    보는 순서상 진짜로 "유저 문장 파싱 직전 마지막으로 읽는 내용"이 됨.
+
+v16 대비 변경점 (참고, 그대로 유지) - LSD-implies-night 규칙(Rule 17) 자체가 일부 필드에서
+미발동하는 더 근본적인 버그 대응:
+  batch7에서 auto 플래그 버그(v15에서 해결)를 고치고 재검증하는 과정에서, LSD taxonomy 11개
+  필드 중 최소 3개(sign_white_heavy_reflection, camera_torn_frame, low_streetlight_road)는
+  time=night 자체가 전혀 안 붙는 걸 발견함. motorbike_headlamp/reflector_guardrail(few-shot
+  예시에 쓰인 필드)만 정상 동작 — 예시로 준 필드에만 규칙이 결합되고 나머지 9개 필드로는
+  일반화가 안 된 것으로 추정(v8->v9 전환 때와 유사한 패턴).
+  추가 가설: camera_torn_frame은 정의상 "카메라 결함(광원 아님)"인데, 기존 Rule 17 문구가
+  "LSD tags ... night-time-only data"처럼 광원 개념과 결부되어 읽힐 수 있어 모델이 "이건
+  광원이 아니니 대상 아님"으로 오판했을 가능성.
+
+대응:
+  - 구조적 수정(v9 방식 재적용): build_aaa1_taxonomy()의 "[lsd target tags]" 섹션 헤더
+    바로 아래에, 규칙을 few-shot 예시가 아니라 필드 목록 자체의 메타데이터로 명시. 이렇게
+    규칙이 "타고 다니는" 대상을 개별 예시 문장이 아니라 섹션 멤버십 자체로 바꿈으로써 예시에
+    없던 필드로도 일반화되도록 유도.
+  - Rule 17 문구에서 "광원(light source)" 프레이밍을 제거하고, "[lsd target tags] 섹션에
+    속한 필드는 그 의미(광원/반사/카메라 결함 등)와 무관하게 전부 적용 대상"이라는 점을
+    명시적으로 재작성.
+  - Few-shot 예시 1개 추가(camera_torn_frame, 광원이 아닌 케이스를 이중 안전장치로 시연).
+
+재검증 결과 (batch8, 11개 필드 전수 테스트) - 부분 개선, 완전 해결 아님:
+  camera_torn_frame(신규 few-shot 대상), reflector_guardrail, motorbike_headlamp,
+  reflector_lane_divider, reflector_tunnel_lowmid_light, sign_strong_light_reflection 6개는
+  정상(field 매칭 + time=night + auto:true 3박자 모두 통과). 그러나 low_streetlight_road,
+  oncoming_vehicle_far_60m, oncoming_vehicle_taillight_cluster, reflector_white_all,
+  sign_white_heavy_reflection 5개는 여전히 time=night 자체가 안 붙음 - 구조적 수정 +
+  Rule 17 재작성만으로는 완전히 해결되지 않았음.
+  의심되는 근본 원인(미확정, 후속 조사 필요): 이 시스템 프롬프트가 이미 약 8,700토큰이고
+  서버의 max_model_len이 12,000토큰뿐이라(vllm /tokenize로 실측), 프롬프트 뒷부분/특정
+  섹션에 대한 모델의 attention이 약해지는 "lost in the middle" 현상일 가능성이 있음 - 이 경우
+  문구를 아무리 다듬어도 프롬프트가 이 정도로 큰 상태로는 완전한 일반화가 어려울 수 있고,
+  프롬프트 자체를 줄이거나 구조를 재편해야 근본 해결이 될 수 있음.
+
+v15 대비 변경점 (참고, 그대로 유지) - "auto" 플래그가 안 붙는 회귀 버그 대응:
+  batch7에서 발견: "가드레일에 반사되는 불빛이 보이는 도로" (야간 언급 전혀 없음, LSD 태그
+  reflector_guardrail만 매칭) 입력 시 time=night은 정상적으로 추가되지만 "auto":true가
+  누락됨.
+
+원인 조사 (v15 작업 전 확인):
+  실제 vLLM 서버(Qwen/Qwen3-VL-8B-Instruct, VLLM_BASE_URL=http://127.0.0.1:8001/v1)에 직접
+  질의해서 validate_and_sanitize() 이전의 raw 모델 출력을 확인함. raw 출력 단계에서 이미
+  "auto" 키가 빠져 있었음 (3회 반복 재현, temperature=0으로 결과 안정적). 즉:
+  (a) 모델/프롬프트 문제가 원인 확정. validate_and_sanitize()/fix_group_if_misclassified()는
+  atomic condition의 정상 케이스에서 원본 dict를 그대로 반환하므로 auto 키를 건드리지 않음
+  (코드 문제 아님, (b) 배제) - index.html 렌더링 이전에 이미 데이터가 없으므로 (c)도 배제.
+  기존 프롬프트의 few-shot 예시가 "터널+헤드램프"(야간 언급 없음) / "야간+가드레일"(야간 명시)
+  단 두 케이스만 다루고 있어서, 두 예시와 정확히 일치하지 않는 새 문장 패턴(가드레일+야간
+  언급 없음)에서 규칙이 안정적으로 일반화되지 않은 것으로 보임 - 사실상 규칙을 추론하기보다
+  두 예시를 거의 그대로 재현하는 것에 가까운 동작.
+
+대응:
+  - 프롬프트: Rule 19에 "lsd_tag 매칭 + 명시적 야간 언급 없음 -> auto:true 누락은 항상 버그"
+    라는 기본 가정(default assumption) 문구를 보강. 이번에 실패한 문장을 그대로 세 번째
+    few-shot 예시로 추가(터널+헤드램프, 야간+가드레일 예시와 나란히 배치해 세 패턴을 함께
+    보여줌으로써 두 예시 사이의 "보간"이 아니라 규칙 자체를 일반화하도록 유도).
+  - 코드: 변경 없음 (원인이 (a)로 확정되었으므로 validate_and_sanitize()는 그대로 유지).
+
+v14 대비 변경점 (참고, 그대로 유지) - 정확도 개선이 아니라 투명성(explainability) 개선:
+  LSD-implies-night 규칙(v12에서 도입)으로 모델이 자동으로 붙인 time=night 조건과, 사용자가
+  문장에 "야간"/night를 직접 언급해서 나온 time=night 조건이 화면에서 구분 없이 똑같이
+  보여서 "왜 이 조건이 붙었는지" 알기 어려운 문제 대응.
+
+대응:
+  - 프롬프트: atomic condition 출력 스키마에 선택적 키 "auto"(boolean) 추가. LSD-implies-night
+    규칙으로 자동 추가된 time=night 조건에만 "auto":true를 붙이도록 규칙(19번) + 관련 few-shot
+    예시 2개(터널+헤드램프 한국어/영어) 갱신. 문장에 야간이 직접 언급된 경우는 기존처럼
+    auto 키 없이 출력.
+  - 코드: validate_and_sanitize()는 field/key/value만 검사하고, misclassified가 아닌 정상
+    조건은 원본 dict를 그대로 반환하므로 "auto" 같은 부가 키는 손대지 않고 자동으로 보존됨
+    (별도 코드 수정 불필요 — 아래 is_valid_condition/fix_group_if_misclassified 주석 참고).
+
+v13 대비 변경점 (참고, 그대로 유지) - 전체 체크리스트 15문장 재검증 중 발견된 3개 버그 대응:
   버그7) unmapped_terms 사유가 taxonomy 실제 상태와 모순되는 거짓 진술을 만들어냄.
          예: "눈길"을 unmapped 처리하며 "weather 허용값에 snow 옵션 없음"이라고 썼는데
          실제로는 snow가 허용값 목록에 있음. 근본 원인 규칙 추가 + "눈길"->snow 매핑 예시.
@@ -57,7 +165,7 @@ v10 변경점 (참고, 그대로 유지):
     export VLLM_BASE_URL="http://127.0.0.1:8001/v1"
     export VLLM_MODEL_NAME="Qwen/Qwen3-VL-8B-Instruct"
     export VLLM_API_KEY="dummy"
-    python3 vllm_query_parser_v13.py "야간 우천 시 보행자 횡단 장면"
+    python3 vllm_query_parser_v14.py "야간 우천 시 보행자 횡단 장면"
 """
 
 import sys
@@ -288,16 +396,26 @@ Rules:
     However, if the negative phrase demands a DIFFERENT value that has no matching taxonomy entry
     (e.g. "비가 오지 않는 흐린 날" implies a "cloudy" weather state that isn't clear/rainy/snow/fog),
     that IS a genuine unmatched condition and must still be listed.
-17. LSD tags (all entries under "[lsd target tags]") are defined as night-time-only data — if
-    ANY lsd_tag condition is matched, automatically include {{"field":"time","value":"night"}} in
-    the same AND group (unless the sentence explicitly contradicts it, which should not happen in
-    practice since LSD conditions are physically night-only). This applies even if the sentence
-    doesn't explicitly mention night/야간.
 18. When a sentence has a condition that applies to ALL branches of an OR structure (i.e. it's not
     part of the either/or choice itself), that condition must be repeated inside EVERY branch of the
     resulting "any" group — never omitted from the query entirely. Do not drop a condition just
     because it's shared across branches instead of being explicitly repeated in the sentence for
     each one.
+19. When you add {{"field":"time","value":"night"}} SOLELY because of the LSD-implies-night rule
+    (i.e. the sentence itself does not mention night/야간/밤 etc.), mark that specific condition
+    with an extra key: {{"field":"time","value":"night","auto":true}}. If the sentence DOES
+    explicitly mention night-related wording, output the normal condition without "auto" (or
+    "auto":false), since it's a direct match, not an inference. This "auto" flag applies ONLY to
+    this specific LSD-implies-night inference — do not use it for any other condition.
+    IMPORTANT: check for explicit night wording FIRST, independently of whether an LSD tag also
+    matched. Matching an LSD tag does NOT automatically mean "auto":true — it only means
+    "auto":true when night is otherwise unstated. If the sentence says "야간"/night AND also
+    matches an LSD tag, that is a coincidence of two independently-true facts, not a trigger for
+    "auto" — the correct output in that case is the plain (non-auto) time=night condition.
+    Default assumption: whenever ANY lsd_tag condition is present in the query and the sentence has
+    NO explicit time/night wording, the added time=night MUST have auto:true. There is no valid case
+    where an lsd_tag is matched, time=night is added, and auto is omitted or false — omitting the
+    auto flag in that situation is always a bug. Double-check this before finalizing output.
 
 Supported Motional Scenario taxonomy:
 {motional_taxonomy}
@@ -359,8 +477,22 @@ Output: {{"query":{{"all":[{{"field":"weather","value":"rainy"}},{{"field":"da_r
 User: "터널 안에서 오토바이 헤드램프가 보이는 상황"
 Reasoning: "motorbike_headlamp" is an LSD tag, and LSD tags are night-time-only data by
 definition, so time=night must be added automatically even though the sentence never says
-"야간"/night.
-Output: {{"query":{{"all":[{{"field":"time","value":"night"}},{{"field":"aaa1_tag","key":"motorbike_headlamp","value":"present"}}]}},"unmapped_terms":["터널이라는 도로 유형(맥락) - da_road_type 허용값 목록에 터널 옵션 없음"]}}
+"야간"/night. Since this time=night comes purely from the LSD-implies-night inference (not stated
+in the sentence), mark it with "auto":true.
+Output: {{"query":{{"all":[{{"field":"time","value":"night","auto":true}},{{"field":"aaa1_tag","key":"motorbike_headlamp","value":"present"}}]}},"unmapped_terms":["터널이라는 도로 유형(맥락) - da_road_type 허용값 목록에 터널 옵션 없음"]}}
+
+User: "야간에 가드레일에 반사되는 불빛이 보이는 도로"
+Reasoning: "reflector_guardrail" is an LSD tag too, but this sentence explicitly says "야간" — the
+time=night condition is a DIRECT statement, not something inferred purely from the LSD-implies-
+night rule. Even though an LSD tag also matched, do NOT add "auto":true here; "auto" is reserved
+for cases where night is otherwise unstated. Output the plain condition without "auto".
+Output: {{"query":{{"all":[{{"field":"time","value":"night"}},{{"field":"aaa1_tag","key":"reflector_guardrail","value":"present"}}]}},"unmapped_terms":[]}}
+
+User: "가드레일에 반사되는 불빛이 보이는 도로"
+Reasoning: No time/night wording anywhere in the sentence. "reflector_guardrail" is an lsd_tag,
+which per the LSD-implies-night rule means time=night must be added, and since it's purely
+inferred (not stated), it MUST carry auto:true.
+Output: {{"query":{{"all":[{{"field":"time","value":"night","auto":true}},{{"field":"aaa1_tag","key":"reflector_guardrail","value":"present"}}]}},"unmapped_terms":[]}}
 
 User: "비가 오지 않는 맑은 날 고속도로"
 Reasoning: "맑은 날" -> weather=clear. "비가 오지 않는" is redundant with clear (already excludes
@@ -407,8 +539,9 @@ Output: {{"query":{{"all":[{{"field":"time","value":"night"}},{{"field":"weather
 
 User: "motorcycle headlamp visible in a tunnel"
 Reasoning: "motorbike_headlamp" is an LSD tag (night-time-only data), so time=night is added
-automatically even though "night" is never said. "tunnel" has no matching da_road_type value.
-Output: {{"query":{{"all":[{{"field":"time","value":"night"}},{{"field":"aaa1_tag","key":"motorbike_headlamp","value":"present"}}]}},"unmapped_terms":["tunnel road type - not in da_road_type allowed values"]}}
+automatically even though "night" is never said — mark it "auto":true since it's a pure inference,
+not a direct statement. "tunnel" has no matching da_road_type value.
+Output: {{"query":{{"all":[{{"field":"time","value":"night","auto":true}},{{"field":"aaa1_tag","key":"motorbike_headlamp","value":"present"}}]}},"unmapped_terms":["tunnel road type - not in da_road_type allowed values"]}}
 
 User: "starting a left turn at high speed"
 Reasoning: Direction (left) and speed (high) are independent axes in the "starting_*_turn" group —
@@ -465,7 +598,11 @@ def validate_and_sanitize(result: dict) -> dict:
         return False
 
     def fix_group_if_misclassified(cond: dict) -> dict:
-        """field가 잘못 분류됐어도(예: motional 이름인데 aaa1_tag로 옴) 실제 존재하는 이름이면 바로잡음."""
+        """field가 잘못 분류됐어도(예: motional 이름인데 aaa1_tag로 옴) 실제 존재하는 이름이면 바로잡음.
+        주의: "auto" 같은 부가 메타데이터 키는 field/key/value만으로 검증하는 이 파이프라인에서
+        건드릴 이유가 없음 - 아래 두 misclassified 분기만 새 dict를 만들고(원래 misclassification
+        자체가 드문 edge case이며 time=night에는 해당 안 됨), 정상 케이스(마지막 return cond)는
+        원본 dict를 그대로 반환하므로 auto 키가 자동으로 보존됨. 별도 코드 수정 불필요."""
         field = cond.get("field")
         if field == "aaa1_tag" and cond.get("key") in _MOTIONAL_NAMES:
             return {"field": "motional_scenario", "value": cond["key"]}
@@ -504,6 +641,80 @@ def validate_and_sanitize(result: dict) -> dict:
     unmapped.extend(removed_notes)
 
     return {"query": sanitized_query, "unmapped_terms": unmapped}
+
+
+def enforce_lsd_implies_night(result: dict) -> dict:
+    """
+    LSD 태그(aaa1_tag의 key가 LSD_TARGET_NAMES에 속함)는 정의상 야간 전용 데이터이므로,
+    쿼리 트리 안에서 LSD 태그를 포함하는 모든 AND 레벨에 time=night이 결정론적으로
+    포함되도록 보장한다. 프롬프트로 모델에게 계속 맡기지 않고 여기서 확정 처리
+    (validate_and_sanitize() 이후, parse_query() 리턴 직전에 호출).
+
+    - 해당 레벨에 이미 time 조건이 있으면(값 무관) 건드리지 않음 - night이면 그대로 두고,
+      night이 아닌 값(day/dawn_evening)이면 모순이므로 경고만 로그로 남기고 건드리지 않음.
+    - time 조건이 아예 없으면 {"field":"time","value":"night","auto":true}를 새로 추가.
+    - any(OR) 그룹은 분기마다 독립적으로 재귀 처리하므로, LSD 태그가 있는 분기에만
+      night이 붙고 다른 분기는 영향받지 않는다.
+    """
+
+    def contains_lsd_tag(node):
+        if node is None:
+            return False
+        if "all" in node:
+            return any(contains_lsd_tag(c) for c in node["all"])
+        if "any" in node:
+            return any(contains_lsd_tag(c) for c in node["any"])
+        return node.get("field") == "aaa1_tag" and node.get("key") in LSD_TARGET_NAMES
+
+    def existing_time_value(node):
+        if node is None:
+            return None
+        if "all" in node:
+            for c in node["all"]:
+                value = existing_time_value(c)
+                if value is not None:
+                    return value
+            return None
+        if "any" in node:
+            for c in node["any"]:
+                value = existing_time_value(c)
+                if value is not None:
+                    return value
+            return None
+        if node.get("field") == "time":
+            return node.get("value")
+        return None
+
+    def walk(node):
+        if node is None:
+            return None
+        if "any" in node:
+            node["any"] = [walk(c) for c in node["any"]]
+            return node
+        if "all" in node:
+            # Only recurse into nested OR groups (each branch needs its own AND-level
+            # treatment). Atomic/nested-AND children stay as-is here — this "all" node
+            # itself is the AND-level that gets a single night condition appended below,
+            # so an atomic LSD child must NOT be individually wrapped into its own
+            # {"all": [...]} (that would double-nest and duplicate the night condition).
+            node["all"] = [walk(c) if c is not None and "any" in c else c for c in node["all"]]
+            if contains_lsd_tag(node):
+                existing = existing_time_value(node)
+                if existing is None:
+                    node["all"].append({"field": "time", "value": "night", "auto": True})
+                elif existing != "night":
+                    print(
+                        f"[경고] LSD 태그와 모순되는 time={existing} 조건이 있어 night 강제 "
+                        f"추가를 건너뜀: {json.dumps(node, ensure_ascii=False)}"
+                    )
+            return node
+        # atomic condition 하나뿐인 경우
+        if node.get("field") == "aaa1_tag" and node.get("key") in LSD_TARGET_NAMES:
+            return {"all": [node, {"field": "time", "value": "night", "auto": True}]}
+        return node
+
+    result["query"] = walk(result.get("query"))
+    return result
 
 
 def get_client() -> OpenAI:
@@ -553,12 +764,14 @@ def parse_query(user_query: str) -> dict:
         print(text)
         raise
 
-    return validate_and_sanitize(raw_result)
+    sanitized = validate_and_sanitize(raw_result)
+    sanitized = enforce_lsd_implies_night(sanitized)
+    return sanitized
 
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print('사용법: python3 vllm_query_parser_v13.py "검색하고 싶은 문장"')
+        print('사용법: python3 vllm_query_parser_v14.py "검색하고 싶은 문장"')
         sys.exit(1)
 
     query = sys.argv[1]

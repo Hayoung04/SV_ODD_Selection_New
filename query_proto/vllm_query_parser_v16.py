@@ -1,7 +1,65 @@
 # -*- coding: utf-8 -*-
 """
-14단계 프로토타입: vLLM(Qwen) 쿼리 파서 v14
-v13 대비 변경점 - 정확도 개선이 아니라 투명성(explainability) 개선:
+16단계 프로토타입: vLLM(Qwen) 쿼리 파서 v16
+v15 대비 변경점 - LSD-implies-night 규칙(Rule 17) 자체가 일부 필드에서 미발동하는 더 근본적인
+버그 대응:
+  batch7에서 auto 플래그 버그(v15에서 해결)를 고치고 재검증하는 과정에서, LSD taxonomy 11개
+  필드 중 최소 3개(sign_white_heavy_reflection, camera_torn_frame, low_streetlight_road)는
+  time=night 자체가 전혀 안 붙는 걸 발견함. motorbike_headlamp/reflector_guardrail(few-shot
+  예시에 쓰인 필드)만 정상 동작 — 예시로 준 필드에만 규칙이 결합되고 나머지 9개 필드로는
+  일반화가 안 된 것으로 추정(v8->v9 전환 때와 유사한 패턴).
+  추가 가설: camera_torn_frame은 정의상 "카메라 결함(광원 아님)"인데, 기존 Rule 17 문구가
+  "LSD tags ... night-time-only data"처럼 광원 개념과 결부되어 읽힐 수 있어 모델이 "이건
+  광원이 아니니 대상 아님"으로 오판했을 가능성.
+
+대응:
+  - 구조적 수정(v9 방식 재적용): build_aaa1_taxonomy()의 "[lsd target tags]" 섹션 헤더
+    바로 아래에, 규칙을 few-shot 예시가 아니라 필드 목록 자체의 메타데이터로 명시. 이렇게
+    규칙이 "타고 다니는" 대상을 개별 예시 문장이 아니라 섹션 멤버십 자체로 바꿈으로써 예시에
+    없던 필드로도 일반화되도록 유도.
+  - Rule 17 문구에서 "광원(light source)" 프레이밍을 제거하고, "[lsd target tags] 섹션에
+    속한 필드는 그 의미(광원/반사/카메라 결함 등)와 무관하게 전부 적용 대상"이라는 점을
+    명시적으로 재작성.
+  - Few-shot 예시 1개 추가(camera_torn_frame, 광원이 아닌 케이스를 이중 안전장치로 시연).
+
+재검증 결과 (batch8, 11개 필드 전수 테스트) - 부분 개선, 완전 해결 아님:
+  camera_torn_frame(신규 few-shot 대상), reflector_guardrail, motorbike_headlamp,
+  reflector_lane_divider, reflector_tunnel_lowmid_light, sign_strong_light_reflection 6개는
+  정상(field 매칭 + time=night + auto:true 3박자 모두 통과). 그러나 low_streetlight_road,
+  oncoming_vehicle_far_60m, oncoming_vehicle_taillight_cluster, reflector_white_all,
+  sign_white_heavy_reflection 5개는 여전히 time=night 자체가 안 붙음 - 구조적 수정 +
+  Rule 17 재작성만으로는 완전히 해결되지 않았음.
+  의심되는 근본 원인(미확정, 후속 조사 필요): 이 시스템 프롬프트가 이미 약 8,700토큰이고
+  서버의 max_model_len이 12,000토큰뿐이라(vllm /tokenize로 실측), 프롬프트 뒷부분/특정
+  섹션에 대한 모델의 attention이 약해지는 "lost in the middle" 현상일 가능성이 있음 - 이 경우
+  문구를 아무리 다듬어도 프롬프트가 이 정도로 큰 상태로는 완전한 일반화가 어려울 수 있고,
+  프롬프트 자체를 줄이거나 구조를 재편해야 근본 해결이 될 수 있음.
+
+v15 대비 변경점 (참고, 그대로 유지) - "auto" 플래그가 안 붙는 회귀 버그 대응:
+  batch7에서 발견: "가드레일에 반사되는 불빛이 보이는 도로" (야간 언급 전혀 없음, LSD 태그
+  reflector_guardrail만 매칭) 입력 시 time=night은 정상적으로 추가되지만 "auto":true가
+  누락됨.
+
+원인 조사 (v15 작업 전 확인):
+  실제 vLLM 서버(Qwen/Qwen3-VL-8B-Instruct, VLLM_BASE_URL=http://127.0.0.1:8001/v1)에 직접
+  질의해서 validate_and_sanitize() 이전의 raw 모델 출력을 확인함. raw 출력 단계에서 이미
+  "auto" 키가 빠져 있었음 (3회 반복 재현, temperature=0으로 결과 안정적). 즉:
+  (a) 모델/프롬프트 문제가 원인 확정. validate_and_sanitize()/fix_group_if_misclassified()는
+  atomic condition의 정상 케이스에서 원본 dict를 그대로 반환하므로 auto 키를 건드리지 않음
+  (코드 문제 아님, (b) 배제) - index.html 렌더링 이전에 이미 데이터가 없으므로 (c)도 배제.
+  기존 프롬프트의 few-shot 예시가 "터널+헤드램프"(야간 언급 없음) / "야간+가드레일"(야간 명시)
+  단 두 케이스만 다루고 있어서, 두 예시와 정확히 일치하지 않는 새 문장 패턴(가드레일+야간
+  언급 없음)에서 규칙이 안정적으로 일반화되지 않은 것으로 보임 - 사실상 규칙을 추론하기보다
+  두 예시를 거의 그대로 재현하는 것에 가까운 동작.
+
+대응:
+  - 프롬프트: Rule 19에 "lsd_tag 매칭 + 명시적 야간 언급 없음 -> auto:true 누락은 항상 버그"
+    라는 기본 가정(default assumption) 문구를 보강. 이번에 실패한 문장을 그대로 세 번째
+    few-shot 예시로 추가(터널+헤드램프, 야간+가드레일 예시와 나란히 배치해 세 패턴을 함께
+    보여줌으로써 두 예시 사이의 "보간"이 아니라 규칙 자체를 일반화하도록 유도).
+  - 코드: 변경 없음 (원인이 (a)로 확정되었으므로 validate_and_sanitize()는 그대로 유지).
+
+v14 대비 변경점 (참고, 그대로 유지) - 정확도 개선이 아니라 투명성(explainability) 개선:
   LSD-implies-night 규칙(v12에서 도입)으로 모델이 자동으로 붙인 time=night 조건과, 사용자가
   문장에 "야간"/night를 직접 언급해서 나온 time=night 조건이 화면에서 구분 없이 똑같이
   보여서 "왜 이 조건이 붙었는지" 알기 어려운 문제 대응.
@@ -203,6 +261,16 @@ def build_aaa1_taxonomy() -> str:
 
     lines.append("")
     lines.append("[lsd target tags] (also used with field \"aaa1_tag\", value: present|absent|unknown)")
+    lines.append(
+        "(NOTE: every single field in this section — all "
+        f"{len(LSD_TARGET_NAMES)} of them, INCLUDING camera_torn_frame which is a camera/sensor "
+        "defect rather than a light source — is defined as night-time-only data. This applies "
+        "uniformly regardless of whether the field's meaning is about a light source, a "
+        "reflection, or something unrelated to light like a sensor defect. Matching ANY field in "
+        "this section, with no exception, means time=night must be added — with auto:true unless "
+        "the sentence already states night explicitly. This is section membership, not a "
+        "judgment call about each field's individual meaning.)"
+    )
     for key, desc in FIELD_DESCRIPTIONS.items():
         if key in LSD_TARGET_NAMES:
             lines.append(f"- {key} : {desc}")
@@ -302,11 +370,14 @@ Rules:
     However, if the negative phrase demands a DIFFERENT value that has no matching taxonomy entry
     (e.g. "비가 오지 않는 흐린 날" implies a "cloudy" weather state that isn't clear/rainy/snow/fog),
     that IS a genuine unmatched condition and must still be listed.
-17. LSD tags (all entries under "[lsd target tags]") are defined as night-time-only data — if
-    ANY lsd_tag condition is matched, automatically include {{"field":"time","value":"night"}} in
-    the same AND group (unless the sentence explicitly contradicts it, which should not happen in
-    practice since LSD conditions are physically night-only). This applies even if the sentence
-    doesn't explicitly mention night/야간.
+17. Whenever ANY field from the "[lsd target tags]" section (regardless of that field's specific
+    meaning — light source, reflection, or camera/sensor defect like camera_torn_frame — all of
+    them without exception, per that section's membership, not per individual meaning) is matched,
+    automatically include {{"field":"time","value":"night"}} in the same AND group (unless the
+    sentence explicitly contradicts it, which should not happen in practice since LSD conditions
+    are physically night-only). This applies even if the sentence doesn't explicitly mention
+    night/야간, and even if the field itself has nothing to do with light (e.g. camera_torn_frame
+    is a sensor defect, not a light source — it is still in-section and still triggers this rule).
 18. When a sentence has a condition that applies to ALL branches of an OR structure (i.e. it's not
     part of the either/or choice itself), that condition must be repeated inside EVERY branch of the
     resulting "any" group — never omitted from the query entirely. Do not drop a condition just
@@ -323,6 +394,10 @@ Rules:
     "auto":true when night is otherwise unstated. If the sentence says "야간"/night AND also
     matches an LSD tag, that is a coincidence of two independently-true facts, not a trigger for
     "auto" — the correct output in that case is the plain (non-auto) time=night condition.
+    Default assumption: whenever ANY lsd_tag condition is present in the query and the sentence has
+    NO explicit time/night wording, the added time=night MUST have auto:true. There is no valid case
+    where an lsd_tag is matched, time=night is added, and auto is omitted or false — omitting the
+    auto flag in that situation is always a bug. Double-check this before finalizing output.
 
 Supported Motional Scenario taxonomy:
 {motional_taxonomy}
@@ -394,6 +469,19 @@ time=night condition is a DIRECT statement, not something inferred purely from t
 night rule. Even though an LSD tag also matched, do NOT add "auto":true here; "auto" is reserved
 for cases where night is otherwise unstated. Output the plain condition without "auto".
 Output: {{"query":{{"all":[{{"field":"time","value":"night"}},{{"field":"aaa1_tag","key":"reflector_guardrail","value":"present"}}]}},"unmapped_terms":[]}}
+
+User: "가드레일에 반사되는 불빛이 보이는 도로"
+Reasoning: No time/night wording anywhere in the sentence. "reflector_guardrail" is an lsd_tag,
+which per the LSD-implies-night rule means time=night must be added, and since it's purely
+inferred (not stated), it MUST carry auto:true.
+Output: {{"query":{{"all":[{{"field":"time","value":"night","auto":true}},{{"field":"aaa1_tag","key":"reflector_guardrail","value":"present"}}]}},"unmapped_terms":[]}}
+
+User: "카메라가 찢어진 것처럼 보이는 프레임"
+Reasoning: camera_torn_frame is listed under "[lsd target tags]" — even though its meaning is a
+camera/sensor defect rather than a light source, it's still covered by the night-only rule
+because that rule applies to section membership, not to whether the field is literally about
+light. No night wording is stated, so auto:true.
+Output: {{"query":{{"all":[{{"field":"time","value":"night","auto":true}},{{"field":"aaa1_tag","key":"camera_torn_frame","value":"present"}}]}},"unmapped_terms":[]}}
 
 User: "비가 오지 않는 맑은 날 고속도로"
 Reasoning: "맑은 날" -> weather=clear. "비가 오지 않는" is redundant with clear (already excludes
