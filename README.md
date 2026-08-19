@@ -7,9 +7,12 @@ CSV 추출 · 검수 UI(Accept/Reject)로 실행까지 이어지는 웹 시스�
 - 기간: 2026-06-22 ~ 2026-08-21 (인턴십)
 - 작성자: 김하영
 - 프로젝트: Motional 협업, ODD Data Selection
-<img width="1512" height="823" alt="스크린샷 2026-08-19 오후 5 07 03" src="https://github.com/user-attachments/assets/dd63a818-6d19-4bbb-9795-15f2db98e1ba" />
-<img width="1512" height="821" alt="스크린샷 2026-08-19 오후 5 07 11" src="https://github.com/user-attachments/assets/22ea27d8-f022-4f48-bbc5-3c700e7890bc" />
-<img width="1512" height="819" alt="스크린샷 2026-08-19 오후 5 05 45" src="https://github.com/user-attachments/assets/d11981ce-4296-4f92-801f-bb074ab3db17" />
+
+<p float="left">
+    <img width="378" src="https://github.com/user-attachments/assets/d11981ce-4296-4f92-801f-bb074ab3db17" />
+    <img width="378" src="https://github.com/user-attachments/assets/22ea27d8-f022-4f48-bbc5-3c700e7890bc" />
+    <img width="378" src="https://github.com/user-attachments/assets/dd63a818-6d19-4bbb-9795-15f2db98e1ba" />
+  </p>
 
 ---
 
