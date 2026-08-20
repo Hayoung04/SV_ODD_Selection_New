@@ -102,6 +102,15 @@ CSV 추출 · 검수 UI(Accept/Reject)로 실행까지 이어지는 웹 시스�
 > 이 자료는 8/13에 발표한 자료로 업데이트되지 않은 내용이 있을 수 있습니다. 
 ---
 
+## 🛠 배포/의존성 파일
+
+새 서버 세팅이나 서비스 재등록이 필요할 때 참고 (평소엔 이미 strad35에 다 구성되어 있어 불필요).
+
+- `kafka/requirements.txt`, `scripts/requirements.txt`, `ui/requirements.txt` — 환경별 Python 패키지 목록
+- `deploy/` — systemd 서비스 파일 원본 + 사용법 (`deploy/README.md` 참고)
+
+---
+
 ## 프로젝트 한눈에 보기
 
 ```
@@ -111,7 +120,7 @@ Qumulo(원본) → Kafka(dev.shared.odd-tagging.input)
   → Elasticsearch(odd-frames-v2, 976건)
   → 검색 UI(index.html: 체크박스 필터 + AI 자연어 검색) / 검수 UI(review.html) ← server.py
                                                               ↑
-                                              vLLM(AI 자연어 검색 전용, 9번 섹션 참고)
+                                              vLLM(AI 자연어 검색 전용, 인수인계_상세본.md 9번 섹션 참고)
 ```
 
 **완료된 것**

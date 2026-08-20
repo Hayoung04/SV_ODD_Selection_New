@@ -1,0 +1,14 @@
+[Unit]
+Description=ODD Kafka Consumer (Motional/ODD tagging input consumer)
+After=network.target docker.service
+
+[Service]
+Type=simple
+User=hayoung.kim
+WorkingDirectory=/home/odd-selection/kafka
+ExecStart=/home/odd-selection/kafka/venv/bin/python3 -u kafka_consumer.py
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

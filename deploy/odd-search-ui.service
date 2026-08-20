@@ -1,0 +1,14 @@
+[Unit]
+Description=ODD Search/Review UI Server
+After=network.target docker.service
+
+[Service]
+Type=simple
+User=hayoung.kim
+WorkingDirectory=/home/odd-selection/ui
+ExecStart=/usr/bin/python3 -u server.py
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

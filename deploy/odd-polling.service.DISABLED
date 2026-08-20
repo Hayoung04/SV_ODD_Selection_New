@@ -1,0 +1,22 @@
+# ⚠️ 참고용 — 현재 이 서비스는 중단(stop+disable)된 상태입니다.
+# Kafka 경로로 완전히 전환되어 더 이상 사용하지 않지만, 로직(unified_pipeline.py)은
+# Kafka Consumer가 그대로 재사용 중이라 코드/서비스 파일 모두 삭제하지 않고 보존합니다.
+# 다시 활성화하려면 (원칙적으로는 불필요):
+#   sudo systemctl enable odd-polling && sudo systemctl start odd-polling
+
+[Unit]
+Description=ODD Tagging 폴링 서비스 (중단됨, 참고용)
+After=network.target
+
+[Service]
+Type=simple
+User=hayoung.kim
+WorkingDirectory=/home/odd-selection/scripts
+ExecStart=/usr/bin/python3 -u /home/odd-selection/scripts/unified_pipeline.py
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

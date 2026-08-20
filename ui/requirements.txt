@@ -1,0 +1,3 @@
+# ui/server.py 자체는 표준 라이브러리(http.server 등)만 사용해 외부 패키지 불필요.
+# 아래는 AI 자연어 검색(/api/nlquery, vllm_query_parser_v18.py)이 vLLM 호출에 사용.
+openai
