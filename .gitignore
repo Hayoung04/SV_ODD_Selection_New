@@ -14,3 +14,6 @@ es-data/
 kafka/venv/
 __pycache__/
 *.pyc
+*.log
+kafka/motional_producer_cron.log
+kafka/motional_producer.log
