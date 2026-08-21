@@ -62,8 +62,8 @@ DATA_ROOT = "/home/odd-selection/machet18_data"
 ODD_TASK_NAMES = ["AAA1", "LSD"]
 MOTIONAL_ROOT = os.path.join(DATA_ROOT, "motional")
 
-ES_URL = "http://localhost:9200"
-ES_INDEX = "odd-frames-v2"
+ES_URL = os.environ.get("ES_URL", "http://localhost:9200")
+ES_INDEX = os.environ.get("ES_INDEX", "odd-frames-v2")
 ES_AUTH = (os.environ.get("ES_USER"), os.environ.get("ES_PASS"))
 
 if not ES_AUTH[0] or not ES_AUTH[1]:

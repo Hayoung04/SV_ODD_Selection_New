@@ -45,6 +45,29 @@ CSV 추출 · 검수 UI(Accept/Reject)로 실행까지 이어지는 웹 시스�
 
 ---
 
+## 🔧 파이프라인/연결 가이드
+
+| 문서 | 설명 |
+|---|---|
+| [pipeline_interfaces.md](./docs/pipeline_interfaces.md) | 각 컴포넌트(Kafka 메시지, ES 문서, API, vLLM 파서)의 입출력 스펙 |
+| [remote_connection_guide.md](./docs/remote_connection_guide.md) | 본인 PC에서 strad35 데이터에 원격 연결해서 검색/검수 UI 실행하는 법 |
+| [new_environment_setup.md](./docs/new_environment_setup.md) | strad35 없이 완전히 독립된 환경을 새로 구축하는 법 (필요시) |
+
+---
+
+## 📖 참고 문서
+
+인수인계_상세본.md에서 분리된 독립 주제 문서들 (내용이 무거워 별도 파일로 분리, 상세본에서 링크로 연결됨).
+
+| 문서 | 설명 |
+|---|---|
+| [glossary.md](./docs/glossary.md) | 프로젝트 용어 사전 |
+| [troubleshooting.md](./docs/troubleshooting.md) | 자주 겪는 문제와 해결법 |
+| [nlp_query_parser.md](./docs/nlp_query_parser.md) | 자연어 쿼리 파서 개발 배경/히스토리/정확도평가 |
+| [data_source_swap_guide.md](./docs/data_source_swap_guide.md) | 데이터 원본 경로 교체 절차 |
+
+---
+
 ## 📚 자세한 작업 로그 (Confluence)
 
 시행착오, 원인 분석, 코드 스니펫까지 담긴 상세 기록. 특정 기능이 왜 이렇게 만들어졌는지,
