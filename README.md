@@ -109,13 +109,13 @@ Qumulo(원본) → Kafka(dev.shared.odd-tagging.input)
   → Elasticsearch(odd-frames-v2, 976건)
   → 검색 UI(index.html: 체크박스 필터 + AI 자연어 검색) / 검수 UI(review.html) ← server.py
                                                               ↑
-                                              vLLM(AI 자연어 검색 전용, 인수인계_상세본.md 9번 섹션 참고)
+                                              vLLM(Qwen3-14B-FP8, AI 자연어 검색 전용, 인수인계_상세본.md 9번 섹션 참고)
 ```
 
 **완료된 것**
 - ES 파이프라인 (976건 전수 감사 100% 일치)
 - Kafka 연동 (IAM 인증, 대량 1198건 처리 검증)
 - 검색/검수 UI (보안 조치 포함)
-- AI 자연어 검색 프로토타입 (v1~v18, held-out 정확도 약 75%)
+- AI 자연어 검색 프로토타입 (v1~v20, held-out 성격 표적문항 기준 76~82%)
 
 **다음 담당자 할 일 우선순위**는 [인수인계_압축본.md](./handOver/인수인계_압축본.md)의 "다음 담당자 할 일" 섹션 참고.
